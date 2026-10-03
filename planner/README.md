@@ -38,5 +38,9 @@ npm start
 (VPS, Fly.io, Railway и т.п.), HTTPS и `COOKIE_SECURE=1`. Не открывайте сайт в интернет без HTTPS.
 Резервная копия — файлы папки `data/` (`planner.db` и `secret.key`; без `secret.key` сохранённые пароли не расшифровать).
 
+## Публикация на Render.com (с iPad)
+Файлы `render.yaml` и `Dockerfile` уже готовы. Render → New → Blueprint → выбрать репозиторий и ветку → задать `SETUP_CODE` (секретный код для регистрации) → Apply.
+Тариф Starter (платный) нужен ради постоянного диска с базой. После запуска сразу создайте свой аккаунт с этим кодом.
+
 ## Устройство
 `server/` — сервер (Express, SQLite из Node, imapflow), `public/` — страница без сборки, `test/` — тесты.

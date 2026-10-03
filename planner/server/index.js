@@ -11,6 +11,7 @@ import { HttpError } from './validate.js';
 export function createApp() {
   const app = express();
   app.disable('x-powered-by');
+  if (process.env.COOKIE_SECURE === '1') app.set('trust proxy', 1); // за прокси хостинга (для верного IP в ограничении попыток)
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');

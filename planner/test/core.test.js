@@ -103,3 +103,14 @@ test('деморежим отделён от настоящих данных', a
   assert.equal((await demo.post('/mail/connect', { email: 'x@mail.ru', password: 'abcdefgh' })).status, 403);
   assert.ok(!(await real.get('/tasks')).body.some((t) => t.title === 'Подготовить презентацию'));
 });
+
+test('регистрация по коду доступа (для сайта в интернете)', async () => {
+  process.env.SETUP_CODE = 'секрет-123';
+  try {
+    const c = client();
+    assert.equal((await c.get('/auth/state')).body.code_required, true);
+    assert.equal((await c.post('/auth/register', { email: 'code1@example.com', password: 'correct-horse-battery' })).status, 400);
+    assert.equal((await c.post('/auth/register', { email: 'code1@example.com', password: 'correct-horse-battery', code: 'неверно' })).status, 400);
+    assert.equal((await c.post('/auth/register', { email: 'code1@example.com', password: 'correct-horse-battery', code: 'секрет-123' })).status, 200);
+  } finally { delete process.env.SETUP_CODE; }
+});

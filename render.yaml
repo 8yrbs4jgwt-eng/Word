@@ -1,0 +1,22 @@
+# Схема развёртывания для Render.com (Blueprint). Платный тариф нужен ради постоянного диска, где лежит база.
+services:
+  - type: web
+    name: planner
+    runtime: docker
+    rootDir: planner
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/auth/state
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: ALLOW_DEMO
+        value: "0"
+      - key: SETUP_CODE
+        sync: false
+    disk:
+      name: planner-data
+      mountPath: /app/data
+      sizeGB: 1

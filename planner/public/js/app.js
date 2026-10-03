@@ -66,6 +66,7 @@ function authScreen(info) {
   const draw = () => {
     const err = errBox();
     const email = h('input', { type: 'email', name: 'email', autocomplete: 'username', required: true });
+    const code = h('input', { type: 'password', name: 'code', autocomplete: 'off' });
     const pw = h('input', { type: 'password', name: 'password', autocomplete: tab === 'login' ? 'current-password' : 'new-password', required: true });
     clear(box).append(
       h('div', { class: 'brand', style: 'padding:0 0 12px' }, h('div', { class: 'logo' }, icon('check', 20)), h('span', {}, 'Мой планировщик')),
@@ -73,9 +74,10 @@ function authScreen(info) {
       h('form', { class: 'stack', novalidate: true, onsubmit: (e) => {
         e.preventDefault();
         if (!email.value || !pw.value) { err.className = 'msg err'; err.textContent = 'Введите email и пароль'; return; }
-        submitting(e.submitter, err, async () => { await POST(tab === 'login' ? '/auth/login' : '/auth/register', { email: email.value, password: pw.value }); boot(); }, tab === 'login' ? 'Входим…' : 'Создаём…');
+        submitting(e.submitter, err, async () => { await POST(tab === 'login' ? '/auth/login' : '/auth/register', { email: email.value, password: pw.value, code: code.value }); boot(); }, tab === 'login' ? 'Входим…' : 'Создаём…');
       } }, h('h1', { style: 'font-size:1.4rem' }, tab === 'login' ? 'Вход' : 'Создать аккаунт'),
-      field('Email', email), field(tab === 'login' ? 'Пароль' : 'Пароль (не короче 10 символов)', pw), err,
+      field('Email', email), field(tab === 'login' ? 'Пароль' : 'Пароль (не короче 10 символов)', pw),
+      tab === 'register' && info.code_required && field('Код доступа (задаётся владельцем сайта)', code), err,
       h('button', { class: 'btn primary', type: 'submit' }, tab === 'login' ? 'Войти' : 'Создать аккаунт')),
       !info.registration_open && h('p', { class: 'small muted', style: 'margin-top:12px' }, 'Новые аккаунты закрыты: это личный сайт.'),
       info.demo_enabled && h('div', { style: 'margin-top:16px;border-top:1px solid var(--line);padding-top:14px' },

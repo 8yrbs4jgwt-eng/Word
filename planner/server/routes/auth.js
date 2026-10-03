@@ -5,6 +5,14 @@ import { bad, str } from '../validate.js';
 import { isValidTz } from '../dates.js';
 import { seedDemo } from '../demo.js';
 import { randomToken } from '../crypto.js';
+import crypto from 'node:crypto';
+
+const codeOk = (given) => {
+  const need = process.env.SETUP_CODE;
+  if (!need) return true;
+  const a = crypto.createHash('sha256').update(String(given || '')).digest(), b = crypto.createHash('sha256').update(need).digest();
+  return crypto.timingSafeEqual(a, b);
+};
 
 const r = Router();
 
@@ -13,6 +21,7 @@ export const publicUser = (u) => ({ id: u.id, email: u.email, is_demo: !!u.is_de
 r.get('/auth/state', (req, res) => {
   const users = get('SELECT COUNT(*) AS n FROM users WHERE is_demo=0').n;
   res.json({
+    code_required: !!process.env.SETUP_CODE,
     has_users: users > 0,
     registration_open: users === 0 || process.env.ALLOW_REGISTRATION === '1',
     demo_enabled: process.env.ALLOW_DEMO !== '0',
@@ -22,6 +31,8 @@ r.get('/auth/state', (req, res) => {
 r.post('/auth/register', (req, res) => {
   const users = get('SELECT COUNT(*) AS n FROM users WHERE is_demo=0').n;
   if (users > 0 && process.env.ALLOW_REGISTRATION !== '1') throw bad('Регистрация закрыта: аккаунт уже создан');
+  if (!rateLimit(`reg|${req.ip}`, 10)) return res.status(429).json({ error: 'Слишком много попыток. Подождите 15 минут.' });
+  if (!codeOk(req.body.code)) throw bad('Неверный код доступа');
   const email = str(req.body.email, 'Email', { required: true, max: 200 }).toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw bad('Введите корректный email');
   if (email.endsWith('@demo.local')) throw bad('Этот адрес зарезервирован');
