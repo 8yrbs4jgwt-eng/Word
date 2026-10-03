@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fb4d8"/><stop offset=".45" stop-color="#c9c6ea"/><stop offset=".8" stop-color="#e6dff0"/><stop offset="1" stop-color="#f3ecf1"/>
+    </linearGradient>
+    <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8f93c4"/><stop offset="1" stop-color="#c3bde6"/></linearGradient>
+    <linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a7bb5"/><stop offset="1" stop-color="#b3acdc"/></linearGradient>
+    <linearGradient id="m3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5e5a9c"/><stop offset="1" stop-color="#9a93cc"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#c8c1ee" stop-opacity=".25"/></linearGradient>
+    <radialGradient id="sun" cx=".72" cy=".28" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <rect width="1600" height="1000" fill="url(#sun)"/>
+  <g filter="url(#blur)" opacity=".7"><ellipse cx="300" cy="190" rx="260" ry="34" fill="#fff"/><ellipse cx="1150" cy="130" rx="320" ry="30" fill="#fff"/><ellipse cx="800" cy="330" rx="380" ry="26" fill="#f4eefb"/></g>
+  <path d="M0 640 L180 520 L330 600 L520 450 L700 590 L880 480 L1080 610 L1270 470 L1450 580 L1600 520 V1000 H0Z" fill="url(#m1)" opacity=".75"/>
+  <path d="M0 720 L150 640 L320 710 L520 590 L760 720 L960 620 L1180 730 L1380 630 L1600 710 V1000 H0Z" fill="url(#m2)" opacity=".85"/>
+  <g opacity=".92">
+    <path d="M1020 760 V470 L1100 440 V760Z" fill="url(#glass)"/><path d="M1100 760 V400 L1210 360 V760Z" fill="#6c68a8" opacity=".55"/>
+    <path d="M1210 760 V500 L1330 470 V760Z" fill="url(#glass)"/><path d="M900 760 V560 L1020 540 V760Z" fill="#7b78b6" opacity=".45"/>
+    <g stroke="#fff" stroke-opacity=".35" stroke-width="2"><path d="M1100 440 L1100 760M1160 380 L1160 760M1210 360 L1210 760M1270 485 L1270 760M1330 470 L1330 760"/></g>
+  </g>
+  <path d="M0 800 C260 760 480 840 760 800 S1260 770 1600 820 V1000 H0Z" fill="url(#m3)"/>
+  <path d="M0 880 C300 850 600 910 900 880 S1400 860 1600 890 V1000 H0Z" fill="#3f3a7a" opacity=".55"/>
+</svg>
