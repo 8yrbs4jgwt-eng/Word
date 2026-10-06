@@ -16,6 +16,7 @@ export function ItemDetails({ item, onClose }: { item: Item | null; onClose: () 
           <p className="first-letter:uppercase">
             {fmtLong(item.date)}, <span className="num font-semibold">{timeLabel(item)}</span>
           </p>
+          {item.elective && <p className="text-sm font-medium text-primary">Элективная дисциплина (по выбору)</p>}
           {item.location && (
             <p className="flex items-start gap-2"><MapPin size={18} aria-hidden className="mt-0.5 shrink-0 text-muted" /> {item.location}</p>
           )}

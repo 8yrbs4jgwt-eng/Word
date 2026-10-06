@@ -31,7 +31,7 @@ describe("повторы", () => {
 
 describe("календарь", () => {
   it("пары переводятся в пояс пользователя", () => {
-    const [i] = classItems([{ id: "c", date: "2026-10-06", start: "10:00", end: "11:30", title: "A", location: "", teacher: "", cancelled: false }], "Asia/Novosibirsk");
+    const [i] = classItems([{ id: "c", date: "2026-10-06", start: "10:00", end: "11:30", title: "A", location: "", teacher: "", cancelled: false, elective: false }], "Asia/Novosibirsk");
     expect([i.start, i.end]).toEqual([14 * 60, 15 * 60 + 30]);
   });
   it("дедлайн 23:59 МСК у студента во Владивостоке уходит на следующий день", () => {

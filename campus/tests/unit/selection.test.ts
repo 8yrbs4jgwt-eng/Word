@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import { normalizeEvents } from "@/lib/spbu/normalize";
-import { applySelection, buildCatalog, disciplineOf, kindOf, NONE, slotKey, unresolvedSlots, type Selection } from "@/lib/selection";
+import { applySelection, buildCatalog, disciplineOf, kindOf, NONE, slotKey, undecidedElectives, unresolvedSlots, type Selection } from "@/lib/selection";
 
 const events = normalizeEvents(JSON.parse(fs.readFileSync("tests/fixtures/events-week.json", "utf8")), 1);
 
@@ -58,5 +58,25 @@ describe("выбор дисциплин и подгрупп", () => {
     const first = all[0];
     const sel2: Selection = { groupId: 1, hidden: [], picks: { [first.key]: first.options[0].teacher } };
     expect(unresolvedSlots(events, sel2, 1)).toHaveLength(all.length - 1);
+  });
+});
+
+describe("элективы", () => {
+  const withElectives = events.map((e, i) => ({ ...e, elective: e.title.startsWith("Информатика") || i === 0 && false }));
+  it("пока студент не выбирал — показываются все, но есть неопределённые", () => {
+    expect(applySelection(withElectives, null, 1)).toHaveLength(events.length);
+    expect(undecidedElectives(withElectives, null, 1)).toEqual(["Информатика"]);
+  });
+  it("после выбора остаются только отмеченные элективы", () => {
+    const none: Selection = { groupId: 1, hidden: [], picks: {}, electives: [] };
+    expect(applySelection(withElectives, none, 1).some((e) => e.title.startsWith("Информатика"))).toBe(false);
+    expect(applySelection(withElectives, none, 1).length).toBeLessThan(events.length);
+    const mine: Selection = { groupId: 1, hidden: [], picks: {}, electives: ["Информатика"] };
+    expect(applySelection(withElectives, mine, 1)).toHaveLength(events.length);
+    expect(undecidedElectives(withElectives, mine, 1)).toEqual([]);
+  });
+  it("обычные дисциплины электив-выбор не затрагивает", () => {
+    const none: Selection = { groupId: 1, hidden: [], picks: {}, electives: [] };
+    expect(applySelection(withElectives, none, 1).some((e) => e.title.startsWith("Алгебра"))).toBe(true);
   });
 });

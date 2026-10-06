@@ -54,6 +54,8 @@ export const settingsSchema = z.object({
     .object({
       groupId: z.number().int(),
       hidden: z.array(z.string().max(300)).max(300),
+      /** выбранные элективы; undefined — студент ещё не выбирал (показываем все) */
+      electives: z.array(z.string().max(300)).max(300).optional(),
       picks: z.record(z.string().max(400), z.string().max(300)).refine((r) => Object.keys(r).length <= 400),
     })
     .nullable()

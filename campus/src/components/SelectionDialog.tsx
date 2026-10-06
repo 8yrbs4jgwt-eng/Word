@@ -23,13 +23,23 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
   const catalog = useMemo(() => buildCatalog(classes), [classes]);
   const own = selection?.groupId === group.id ? selection : null;
   const [hidden, setHidden] = useState<string[]>(own?.hidden ?? []);
+  // элективы по умолчанию не выбраны: студент отмечает только свои
+  const [electives, setElectives] = useState<string[]>(own?.electives ?? []);
   const [picks, setPicks] = useState<Record<string, string>>(own?.picks ?? {});
   const [q, setQ] = useState("");
   const qq = q.trim().toLowerCase();
 
+  const toggleElective = (name: string) => setElectives((h) => (h.includes(name) ? h.filter((x) => x !== name) : [...h, name]));
+  const regular = catalog.disciplines.filter((d) => !d.elective);
+  const electiveList = catalog.disciplines.filter((d) => d.elective);
   const toggleDiscipline = (name: string) => setHidden((h) => (h.includes(name) ? h.filter((x) => x !== name) : [...h, name]));
-  const slots = catalog.slots.filter((s) => !hidden.includes(disciplineOf(s.title)) && (!qq || s.title.toLowerCase().includes(qq)));
-  const pending = catalog.slots.filter((s) => !hidden.includes(disciplineOf(s.title)) && picks[s.key] === undefined).length;
+  const electiveNames = new Set(electiveList.map((d) => d.name));
+  const active = (s: { title: string }) => {
+    const n = disciplineOf(s.title);
+    return !hidden.includes(n) && (!electiveNames.has(n) || electives.includes(n));
+  };
+  const slots = catalog.slots.filter((s) => active(s) && (!qq || s.title.toLowerCase().includes(qq)));
+  const pending = catalog.slots.filter((s) => active(s) && picks[s.key] === undefined).length;
 
   return (
     <div className="space-y-5">
@@ -44,10 +54,33 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
         <>
           <input type="search" className={inputCls} placeholder="Найти предмет" aria-label="Найти предмет" value={q} onChange={(e) => setQ(e.target.value)} />
 
+          {electiveList.length > 0 && (
+            <section aria-labelledby="sel-e" className="space-y-2">
+              <h3 id="sel-e" className="eyebrow">Элективы (дисциплины по выбору)</h3>
+              <p className="text-sm text-muted">Отметьте только те, на которые вы записаны. Остальные элективы в расписании не покажутся.</p>
+              <ul className="space-y-1.5">
+                {electiveList.filter((d) => !qq || d.name.toLowerCase().includes(qq)).map((d) => {
+                  const on = electives.includes(d.name);
+                  return (
+                    <li key={d.name}>
+                      <label className={cx("flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5", on ? "border-primary bg-primary-soft" : "border-border")}>
+                        <input type="checkbox" className="mt-1 size-5 accent-[var(--primary)]" checked={on} onChange={() => toggleElective(d.name)} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-medium">{d.name}</span>
+                          <span className="block text-xs text-muted">{d.kinds.join(", ") || "занятия"} · {d.count} за 4 недели</span>
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
           <section aria-labelledby="sel-d" className="space-y-2">
             <h3 id="sel-d" className="eyebrow">Дисциплины</h3>
             <ul className="space-y-1.5">
-              {catalog.disciplines.filter((d) => !qq || d.name.toLowerCase().includes(qq)).map((d) => {
+              {regular.filter((d) => !qq || d.name.toLowerCase().includes(qq)).map((d) => {
                 const on = !hidden.includes(d.name);
                 return (
                   <li key={d.name}>
@@ -103,7 +136,7 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
       <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
         <Button variant="ghost" onClick={onClose}>Пропустить</Button>
         <Button onClick={() => { onSave(null); onClose(); }}>Показывать всё</Button>
-        <Button variant="primary" disabled={!catalog.disciplines.length} onClick={() => { onSave({ groupId: group.id, hidden, picks }); onClose(); }}>Сохранить</Button>
+        <Button variant="primary" disabled={!catalog.disciplines.length} onClick={() => { onSave({ groupId: group.id, hidden, picks, ...(electiveList.length ? { electives } : {}) }); onClose(); }}>Сохранить</Button>
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ export type Item = {
   subject: string;
   body: string;
   cancelled: boolean;
+  elective: boolean;
   done: boolean;
   high: boolean;
   entryId?: string;
@@ -47,6 +48,7 @@ export function classItems(events: ClassEvent[], tz: string): Item[] {
       subject: "",
       body: "",
       cancelled: e.cancelled,
+      elective: e.elective,
       done: false,
       high: false,
       repeats: false,
@@ -74,6 +76,7 @@ export function entryItems(entries: Entry[], tz: string, from: string, to: strin
         subject: e.subject,
         body: e.body,
         cancelled: false,
+        elective: false,
         done: e.repeat ? e.doneDates.includes(occ) : e.done,
         high: e.priority === "high",
         entryId: e.id,

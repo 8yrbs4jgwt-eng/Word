@@ -70,6 +70,7 @@ export function normalizeEvents(raw: unknown, groupId: number): ClassEvent[] {
         location,
         teacher: str(ev.EducatorsDisplayText),
         cancelled: ev.IsCancelled === true,
+        elective: ev.IsElective === true,
       });
     }
   }

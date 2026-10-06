@@ -243,3 +243,25 @@ test("выбор дисциплин и подгрупп собирает рас�
   await page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("button", { name: "Показывать всё" }).click();
   await expect(page.getByRole("button", { name: /^Пара, .*Алгебра/ }).first()).toBeVisible();
 });
+
+test("элективы: показываются только отмеченные", async ({ page }) => {
+  await open(page);
+  await pickGroup(page, { keepSelection: true });
+  const sel = page.getByRole("dialog", { name: "Мои дисциплины" });
+  const electives = sel.getByRole("region", { name: "Элективы (дисциплины по выбору)" });
+  await expect(electives.getByRole("checkbox", { name: /Информатика/ })).toBeVisible();
+  // в общем списке дисциплин электива нет — он выбирается только в своём блоке
+  await expect(sel.getByRole("region", { name: "Дисциплины", exact: true }).getByRole("checkbox", { name: /Информатика/ })).toHaveCount(0);
+
+  // ничего не отметил → элективов в расписании нет, остальное на месте
+  await sel.getByRole("button", { name: "Сохранить" }).click();
+  await page.getByRole("tab", { name: "Список" }).click();
+  await expect(page.getByRole("button", { name: /^Пара, .*Алгебра/ }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Пара, .*Информатика/ })).toHaveCount(0);
+
+  // отметил электив → он появляется
+  await page.getByRole("button", { name: "Мои дисциплины и подгруппы" }).click();
+  await page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("checkbox", { name: /Информатика/ }).check();
+  await page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("button", { name: "Сохранить" }).click();
+  await expect(page.getByRole("button", { name: /^Пара, .*Информатика/ }).first()).toBeVisible();
+});

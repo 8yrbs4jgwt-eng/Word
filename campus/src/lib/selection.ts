@@ -9,6 +9,8 @@ export type Selection = {
   groupId: number;
   /** названия дисциплин, которые скрыты целиком (факультативы «не мои») */
   hidden: string[];
+  /** выбранные элективы (дисциплины по выбору); undefined — ещё не выбирал, показываем все */
+  electives?: string[];
   /** слот → выбранный преподаватель; NONE — на этом слоте я не занимаюсь */
   picks: Record<string, string>;
 };
@@ -31,16 +33,17 @@ export const slotKey = (e: Pick<ClassEvent, "title" | "date" | "start">) => `${e
 
 export type SlotOption = { teacher: string; locations: string[]; count: number };
 export type Slot = { key: string; title: string; weekday: number; start: string | null; end: string | null; options: SlotOption[] };
-export type Discipline = { name: string; kinds: string[]; count: number };
+export type Discipline = { name: string; kinds: string[]; count: number; elective: boolean };
 export type Catalog = { disciplines: Discipline[]; slots: Slot[] };
 
 /** Каталог для экрана выбора: все дисциплины и слоты, где есть несколько параллельных вариантов. */
 export function buildCatalog(events: ClassEvent[]): Catalog {
-  const disc = new Map<string, { kinds: Set<string>; count: number }>();
+  const disc = new Map<string, { kinds: Set<string>; count: number; elective: boolean }>();
   const slots = new Map<string, Slot>();
   for (const e of events) {
     const name = disciplineOf(e.title);
-    const d = disc.get(name) ?? { kinds: new Set<string>(), count: 0 };
+    const d = disc.get(name) ?? { kinds: new Set<string>(), count: 0, elective: false };
+    if (e.elective) d.elective = true;
     const kind = kindOf(e.title);
     if (kind) d.kinds.add(kind);
     d.count++;
@@ -56,7 +59,7 @@ export function buildCatalog(events: ClassEvent[]): Catalog {
     slots.set(key, s);
   }
   return {
-    disciplines: [...disc].map(([name, v]) => ({ name, kinds: [...v.kinds], count: v.count })).sort((a, b) => a.name.localeCompare(b.name, "ru")),
+    disciplines: [...disc].map(([name, v]) => ({ name, kinds: [...v.kinds], count: v.count, elective: v.elective })).sort((a, b) => a.name.localeCompare(b.name, "ru")),
     slots: [...slots.values()]
       .filter((s) => s.options.length > 1)
       .sort((a, b) => a.title.localeCompare(b.title, "ru") || a.weekday - b.weekday || (a.start ?? "").localeCompare(b.start ?? "")),
@@ -67,12 +70,22 @@ export function buildCatalog(events: ClassEvent[]): Catalog {
 export function applySelection(events: ClassEvent[], sel: Selection | null | undefined, groupId: number | null): ClassEvent[] {
   if (!sel || sel.groupId !== groupId) return events;
   const hidden = new Set(sel.hidden);
+  const electives = sel.electives ? new Set(sel.electives) : null;
   return events.filter((e) => {
-    if (hidden.has(disciplineOf(e.title))) return false;
+    const name = disciplineOf(e.title);
+    if (hidden.has(name)) return false;
+    // элективы: после выбора остаются только отмеченные
+    if (e.elective && electives && !electives.has(name)) return false;
     const pick = sel.picks[slotKey(e)];
     if (pick === undefined) return true;
     return pick !== NONE && pick === (e.teacher || "Преподаватель не указан");
   });
+}
+
+/** Названия элективов, по которым студент ещё не определился (выбор не сохранён). */
+export function undecidedElectives(events: ClassEvent[], sel: Selection | null | undefined, groupId: number | null): string[] {
+  if (sel && sel.groupId === groupId && sel.electives) return [];
+  return buildCatalog(events).disciplines.filter((d) => d.elective).map((d) => d.name);
 }
 
 /** Слоты с параллельными вариантами, по которым выбор ещё не сделан (дисциплина не скрыта). */

@@ -22,6 +22,8 @@ function events(from) {
     for (const e of d.DayStudyEvents) {
       e.Start = shiftIso(e.Start, delta);
       e.End = shiftIso(e.End, delta);
+      // в реальных данных старших курсов элективы приходят с IsElective: true — имитируем для «Информатики»
+      if (e.Subject.startsWith("Информатика")) e.IsElective = true;
     }
   }
   return raw;

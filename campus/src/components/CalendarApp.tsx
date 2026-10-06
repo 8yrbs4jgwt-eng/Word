@@ -11,7 +11,7 @@ import { ItemDetails } from "@/components/ItemDetails";
 import { DayPlan, DeadlinesPanel } from "@/components/Panels";
 import { SelectionDialog } from "@/components/SelectionDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
-import { applySelection, unresolvedSlots } from "@/lib/selection";
+import { applySelection, undecidedElectives, unresolvedSlots } from "@/lib/selection";
 import { Banner, Button, IconButton, KIND_DOT, KIND_LABEL_PL, cx, inputCls } from "@/components/ui";
 import { useApp } from "@/components/store";
 import { useClasses } from "@/components/useClasses";
@@ -102,6 +102,7 @@ export function CalendarApp() {
   // выбор дисциплин и подгрупп применяется только к своей сохранённой группе
   const chosen = useMemo(() => applySelection(classes, settings.selection, group?.id ?? null), [classes, settings.selection, group?.id]);
   const unresolved = useMemo(() => (group && isMine ? unresolvedSlots(classes, settings.selection, group.id) : []), [classes, settings.selection, group, isMine]);
+  const electivesLeft = useMemo(() => (group && isMine ? undecidedElectives(classes, settings.selection, group.id) : []), [classes, settings.selection, group, isMine]);
 
   const all = useMemo(() => {
     const cls = classItems(chosen, tz).filter((i) => i.date >= from && i.date <= to);
@@ -189,7 +190,11 @@ export function CalendarApp() {
           {!online && <Banner tone="warn"><WifiOff size={14} aria-hidden className="mr-1.5 inline" />Нет сети. Показаны сохранённые данные, изменения отправятся позже.</Banner>}
           {online && pending && user && <Banner tone="info">Есть несохранённые на сервере изменения — отправим автоматически.</Banner>}
           {!group && <Banner tone="info" action={<Button variant="primary" size="sm" onClick={() => setDlg("group")}>Выбрать группу</Button>}>Пары появятся после выбора группы. Дедлайны и заметки можно вести и без неё.</Banner>}
-          {unresolved.length > 0 && <Banner tone="info" action={<Button variant="primary" size="sm" onClick={() => setDlg("select")}>Выбрать</Button>}>В расписании есть параллельные занятия ({unresolved.length}) — выберите свою подгруппу или скройте лишние предметы.</Banner>}
+          {(unresolved.length > 0 || electivesLeft.length > 0) && (
+            <Banner tone="info" action={<Button variant="primary" size="sm" onClick={() => setDlg("select")}>Выбрать</Button>}>
+              {electivesLeft.length > 0 ? `В расписании есть элективы (${electivesLeft.length}) — отметьте свои.` : `В расписании есть параллельные занятия (${unresolved.length}) — выберите свою подгруппу или скройте лишние предметы.`}
+            </Banner>
+          )}
           {failed && <Banner tone="error" action={<Button size="sm" onClick={retry}>Повторить</Button>}>Не удалось загрузить расписание, и сохранённой копии ещё нет.</Banner>}
           {staleAt && !failed && <Banner tone="warn" action={<Button size="sm" onClick={retry}>Обновить</Button>}>Расписание СПбГУ сейчас недоступно — показана копия от {new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: tz }).format(new Date(staleAt))}.</Banner>}
 

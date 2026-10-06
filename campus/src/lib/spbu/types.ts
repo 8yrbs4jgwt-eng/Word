@@ -16,6 +16,8 @@ export type ClassEvent = {
   location: string;
   teacher: string;
   cancelled: boolean;
+  /** элективная дисциплина (дисциплина по выбору): поле IsElective из API СПбГУ */
+  elective: boolean;
 };
 
 export type Cached<T> = {

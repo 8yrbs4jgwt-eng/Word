@@ -27,7 +27,7 @@ describe("ics", () => {
     expect(s).toContain("DTEND;VALUE=DATE:20261014");
   });
   it("пары", () => {
-    const s = buildIcs({ name: "K", entries: [], classes: [{ id: "c1", date: "2026-10-05", start: "09:30", end: "11:05", title: "Алгебра", location: "Ауд. 2", teacher: "", cancelled: true }], now: NOW });
+    const s = buildIcs({ name: "K", entries: [], classes: [{ id: "c1", date: "2026-10-05", start: "09:30", end: "11:05", title: "Алгебра", location: "Ауд. 2", teacher: "", cancelled: true, elective: false }], now: NOW });
     expect(s).toContain("DTSTART:20261005T063000Z");
     expect(s).toContain("STATUS:CANCELLED");
   });
