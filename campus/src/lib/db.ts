@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   name TEXT NOT NULL DEFAULT '',
   settings TEXT NOT NULL DEFAULT '{}',
+  feed_token TEXT NOT NULL UNIQUE,
   created_at INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS sessions (
