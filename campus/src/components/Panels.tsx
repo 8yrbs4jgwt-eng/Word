@@ -81,7 +81,7 @@ export function DayPlan({ date, today, items, onOpen, onToggle, onAdd }: { date:
       {items.length === 0 ? (
         <div className="space-y-3 py-3 text-center">
           <p className="text-sm text-muted">На этот день ничего не запланировано</p>
-          <Button size="sm" onClick={onAdd}>Добавить запись</Button>
+          <Button size="sm" onClick={onAdd}>Добавить на этот день</Button>
         </div>
       ) : (
         <ul className="space-y-2">

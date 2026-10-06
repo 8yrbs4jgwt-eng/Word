@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Кампус — расписание и дедлайны
 
-## Getting Started
+Личный учебный календарь для студентов СПбГУ: пары с timetable.spbu.ru, дедлайны и заметки
+с повторами, push-напоминания, экспорт и подписка `.ics`, тёмная тема, PWA и офлайн.
 
-First, run the development server:
+**Стек:** Next.js 16 (App Router) · TypeScript · Tailwind 4 · SQLite (better-sqlite3) · Vitest · Playwright.
+
+## Быстрый старт
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Без доступа к timetable.spbu.ru (или для демо) запустите фейковый сервер расписания на фикстурах:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+node tests/e2e/fake-spbu.mjs 4010 &
+SPBU_BASE_URL=http://localhost:4010/api/v1 npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Тесты
 
-## Learn More
+```bash
+npm test               # Vitest: парсер, кэш, время, повторы, .ics, напоминания, auth, контраст WCAG
+npm run test:e2e       # Playwright: собирает приложение и гоняет основные сценарии (фейковое расписание)
+npm run typecheck && npm run lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Деплой на VPS (Docker)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env   # укажите DOMAIN и VAPID_SUBJECT
+docker compose up -d --build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Caddy сам получит HTTPS-сертификат (нужна A-запись домена на VPS и открытые 80/443).
+HTTPS обязателен для PWA и push. База хранится в томе `campus-data` (`/data/campus.db`) —
+делайте её резервные копии.
 
-## Deploy on Vercel
+## Как устроено
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Часть | Где |
+|---|---|
+| Клиент API расписания, ретраи, таймауты | `src/lib/spbu/client.ts` |
+| Нормализация ответов СПбГУ | `src/lib/spbu/normalize.ts` |
+| Кэш в SQLite: свежий → из кэша; сбой → последний удачный ответ (`stale`) | `src/lib/spbu/cache.ts` |
+| Даты и часовые пояса (без библиотек, `Intl`) | `src/lib/time.ts` |
+| Повторы (день/неделя/месяц, интервал, дни недели, «до») | `src/lib/recurrence.ts` |
+| Единая модель элементов календаря, фильтры, дедлайны | `src/lib/calendar.ts` |
+| Экспорт `.ics` и подписка `/api/feed?token=…` | `src/lib/ics.ts` |
+| Напоминания: что пора слать / планировщик раз в минуту | `src/lib/reminders.ts`, `src/lib/push.ts`, `src/instrumentation.ts` |
+| Гость (localStorage) ↔ аккаунт, очередь офлайн-изменений | `src/components/store.tsx` |
+| Service worker: офлайн-оболочка и push | `public/sw.js` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Решения
+
+- **Время.** Пары приходят по Москве и пересчитываются в пояс из настроек. Личные записи хранят
+  дату, время и пояс создания; при смене пояса показываются в новом.
+- **Авторизация.** Email + пароль (scrypt), сессия в httpOnly-cookie, без писем. Гость работает
+  на localStorage; при входе записи и группа переносятся в аккаунт.
+- **Сбой университета.** Сервер отдаёт последний удачный ответ с пометкой, клиент дополнительно
+  хранит копию недель в localStorage — работает и офлайн.
+- **Напоминания** работают в процессе сервера (`setInterval`), поэтому нужен долгоживущий Node
+  (Docker/VPS), не serverless. Отключить: `DISABLE_REMINDER_JOB=1`.
+- **Подписка .ics** — секретный токен в ссылке; он есть только у аккаунта и показан в настройках.
+
+## Ограничения
+
+- Лимит попыток входа хранится в памяти процесса (при нескольких инстансах нужен общий стор).
+- На iPhone push работает только из установленной PWA («На экран Домой»).
+- Сброс пароля по email не реализован (нет почтового сервиса); добавляется отдельным этапом.

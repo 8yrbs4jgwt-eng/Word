@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "dev:offline": "SPBU_BASE_URL=http://localhost:4010/api/v1 next dev"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

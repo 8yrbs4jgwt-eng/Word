@@ -38,6 +38,8 @@ function Form({ seed, onClose }: { seed: Seed; onClose: () => void }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const clearError = (k: string) => setErrors((prev) => (k in prev ? Object.fromEntries(Object.entries(prev).filter(([key]) => key !== k)) : prev));
+
   function submit(ev: React.FormEvent) {
     ev.preventDefault();
     const repeat: Repeat | null = freq
@@ -89,15 +91,15 @@ function Form({ seed, onClose }: { seed: Seed; onClose: () => void }) {
       </div>
 
       <Field label="Название" htmlFor="e-title" error={errors.title} hint={`${title.length}/160`}>
-        <input id="e-title" className={inputCls} value={title} maxLength={160} autoFocus onChange={(x) => setTitle(x.target.value)} placeholder={kind === "deadline" ? "Презентация по КСО" : "Идея для курсовой"} aria-invalid={!!errors.title} />
+        <input id="e-title" className={inputCls} value={title} maxLength={160} autoFocus onChange={(x) => { setTitle(x.target.value); clearError("title"); }} placeholder={kind === "deadline" ? "Презентация по КСО" : "Идея для курсовой"} aria-invalid={!!errors.title} />
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label={kind === "deadline" ? "Сдать до" : "Дата"} htmlFor="e-date" error={errors.date}>
-          <input id="e-date" type="date" className={inputCls} value={date} onChange={(x) => setDate(x.target.value)} aria-invalid={!!errors.date} />
+          <input id="e-date" type="date" className={inputCls} value={date} onChange={(x) => { setDate(x.target.value); clearError("date"); }} aria-invalid={!!errors.date} />
         </Field>
         <Field label="Время" htmlFor="e-time" hint="необязательно" error={errors.time}>
-          <input id="e-time" type="time" className={inputCls} value={time} onChange={(x) => setTime(x.target.value)} />
+          <input id="e-time" type="time" className={inputCls} value={time} onChange={(x) => { setTime(x.target.value); clearError("time"); }} />
         </Field>
       </div>
       <p className="-mt-2 text-xs text-muted">Часовой пояс: {settings.tz.replace("_", " ")}</p>
@@ -144,7 +146,7 @@ function Form({ seed, onClose }: { seed: Seed; onClose: () => void }) {
                 <input id="e-int" type="number" min={1} max={52} className={inputCls} value={interval} onChange={(x) => setIntervalN(Math.min(52, Math.max(1, Number(x.target.value) || 1)))} />
               </Field>
               <Field label="Закончить" htmlFor="e-until" hint="необязательно" error={errors.until}>
-                <input id="e-until" type="date" className={inputCls} value={until} onChange={(x) => setUntil(x.target.value)} />
+                <input id="e-until" type="date" className={inputCls} value={until} onChange={(x) => { setUntil(x.target.value); clearError("until"); }} />
               </Field>
             </div>
             {freq === "weekly" && (
