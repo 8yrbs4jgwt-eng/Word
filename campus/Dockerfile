@@ -20,8 +20,9 @@ RUN useradd -r -u 1001 campus && mkdir /data && chown campus /data
 COPY --from=build --chown=campus /app/.next/standalone ./
 COPY --from=build --chown=campus /app/.next/static ./.next/static
 COPY --from=build --chown=campus /app/public ./public
-USER campus
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 VOLUME /data
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s CMD node -e "fetch('http://localhost:3000/api/me').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "server.js"]
