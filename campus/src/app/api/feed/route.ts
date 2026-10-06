@@ -3,6 +3,7 @@ import { userByFeedToken } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { entrySchema, type Entry } from "@/lib/entries";
 import { buildIcs } from "@/lib/ics";
+import { applySelection } from "@/lib/selection";
 import { getWeekEvents } from "@/lib/spbu/client";
 import type { ClassEvent } from "@/lib/spbu/types";
 import { addDays, mondayOf, todayIn } from "@/lib/time";
@@ -25,7 +26,11 @@ export async function GET(req: NextRequest) {
     const monday = mondayOf(todayIn("Europe/Moscow"));
     const weeks = Array.from({ length: 10 }, (_, i) => addDays(monday, (i - 1) * 7));
     const res = await Promise.allSettled(weeks.map((w) => getWeekEvents(user.settings.group!.id, w)));
-    classes = res.flatMap((r) => (r.status === "fulfilled" ? r.value.data : []));
+    classes = applySelection(
+      res.flatMap((r) => (r.status === "fulfilled" ? r.value.data : [])),
+      user.settings.selection,
+      user.settings.group.id,
+    );
   }
 
   return new Response(buildIcs({ name: "Кампус", entries, classes }), {

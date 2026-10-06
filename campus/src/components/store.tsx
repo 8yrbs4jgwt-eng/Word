@@ -251,6 +251,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const merged: Settings = {
         ...body.settings,
         group: body.settings.group ?? guestSettings.group,
+        selection: body.settings.group ? body.settings.selection : guestSettings.selection,
         tz: body.settings.tz === DEFAULT_SETTINGS.tz ? guestSettings.tz : body.settings.tz,
         theme: guestSettings.theme !== "system" ? guestSettings.theme : body.settings.theme,
       };

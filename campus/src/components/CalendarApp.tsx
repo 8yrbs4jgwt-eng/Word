@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChevronLeft, ChevronRight, Plus, Search, Settings as Cog, UserRound, Users, WifiOff } from "lucide-react";
+import { Bell, ChevronLeft, ChevronRight, ListChecks, Plus, Search, Settings as Cog, UserRound, Users, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ALL_FILTERS, applyFilters, classItems, entryItems, sortItems, type Filters, type Item } from "@/lib/calendar";
 import { addDays, addMonths, fmtLong, fmtMonthYear, fmtRange, monthGrid, nowMinutesIn, todayIn, weekDays, minToHm } from "@/lib/time";
@@ -9,7 +9,9 @@ import { EntryDialog } from "@/components/EntryDialog";
 import { GroupDialog } from "@/components/GroupDialog";
 import { ItemDetails } from "@/components/ItemDetails";
 import { DayPlan, DeadlinesPanel } from "@/components/Panels";
+import { SelectionDialog } from "@/components/SelectionDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { applySelection, unresolvedSlots } from "@/lib/selection";
 import { Banner, Button, IconButton, KIND_DOT, KIND_LABEL_PL, cx, inputCls } from "@/components/ui";
 import { useApp } from "@/components/store";
 import { useClasses } from "@/components/useClasses";
@@ -61,7 +63,7 @@ export function CalendarApp() {
   const [selected, setSelected] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(ALL_FILTERS);
   const [viewGroup, setViewGroup] = useState<{ id: number; name: string } | null>(null);
-  const [dlg, setDlg] = useState<null | "group" | "settings" | "auth">(null);
+  const [dlg, setDlg] = useState<null | "group" | "settings" | "auth" | "select">(null);
   const [entrySeed, setEntrySeed] = useState<{ entry?: Entry; date?: string; kind?: "deadline" | "note" } | null>(null);
   const [details, setDetails] = useState<Item | null>(null);
   const [online, setOnline] = useState(true);
@@ -97,13 +99,17 @@ export function CalendarApp() {
 
   const { classes, loading, failed, staleAt, retry } = useClasses(group?.id ?? null, from, to);
 
+  // выбор дисциплин и подгрупп применяется только к своей сохранённой группе
+  const chosen = useMemo(() => applySelection(classes, settings.selection, group?.id ?? null), [classes, settings.selection, group?.id]);
+  const unresolved = useMemo(() => (group && isMine ? unresolvedSlots(classes, settings.selection, group.id) : []), [classes, settings.selection, group, isMine]);
+
   const all = useMemo(() => {
-    const cls = classItems(classes, tz).filter((i) => i.date >= from && i.date <= to);
+    const cls = classItems(chosen, tz).filter((i) => i.date >= from && i.date <= to);
     // одна и та же пара может прийти из соседних недель — убираем дубли
     const seen = new Set<string>();
     const uniq = cls.filter((i) => (seen.has(i.key) ? false : (seen.add(i.key), true)));
     return [...uniq, ...entryItems(entries, tz, from, to)];
-  }, [classes, entries, tz, from, to]);
+  }, [chosen, entries, tz, from, to]);
   const items = useMemo(() => applyFilters(all, filters), [all, filters]);
   const dayItems = useMemo(() => sortItems(items.filter((i) => i.date === sel)), [items, sel]);
 
@@ -154,6 +160,7 @@ export function CalendarApp() {
             <span className="truncate">{group ? (isMine ? `Моя группа · ${group.name}` : group.name) : "Выбрать группу"}</span>
           </Button>
           {viewGroup && settings.group && !isMine && <Button size="sm" variant="ghost" onClick={() => setViewGroup(null)}>К моей группе</Button>}
+          {settings.group && <IconButton label="Мои дисциплины и подгруппы" onClick={() => setDlg("select")}><ListChecks size={20} aria-hidden /></IconButton>}
           <IconButton label="Настройки" onClick={() => setDlg("settings")}><Cog size={20} aria-hidden /></IconButton>
           <IconButton label={user ? `Аккаунт: ${user.email}` : "Войти"} onClick={() => setDlg(user ? "settings" : "auth")}><UserRound size={20} aria-hidden /></IconButton>
         </div>
@@ -182,6 +189,7 @@ export function CalendarApp() {
           {!online && <Banner tone="warn"><WifiOff size={14} aria-hidden className="mr-1.5 inline" />Нет сети. Показаны сохранённые данные, изменения отправятся позже.</Banner>}
           {online && pending && user && <Banner tone="info">Есть несохранённые на сервере изменения — отправим автоматически.</Banner>}
           {!group && <Banner tone="info" action={<Button variant="primary" size="sm" onClick={() => setDlg("group")}>Выбрать группу</Button>}>Пары появятся после выбора группы. Дедлайны и заметки можно вести и без неё.</Banner>}
+          {unresolved.length > 0 && <Banner tone="info" action={<Button variant="primary" size="sm" onClick={() => setDlg("select")}>Выбрать</Button>}>В расписании есть параллельные занятия ({unresolved.length}) — выберите свою подгруппу или скройте лишние предметы.</Banner>}
           {failed && <Banner tone="error" action={<Button size="sm" onClick={retry}>Повторить</Button>}>Не удалось загрузить расписание, и сохранённой копии ещё нет.</Banner>}
           {staleAt && !failed && <Banner tone="warn" action={<Button size="sm" onClick={retry}>Обновить</Button>}>Расписание СПбГУ сейчас недоступно — показана копия от {new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: tz }).format(new Date(staleAt))}.</Banner>}
 
@@ -232,9 +240,10 @@ export function CalendarApp() {
         onClose={() => setDlg(null)}
         myGroupId={settings.group?.id ?? null}
         onView={(g) => { setViewGroup(g); setDlg(null); }}
-        onSave={(g) => { updateSettings({ group: g }); setViewGroup(null); setDlg(null); app.say(`Группа ${g.name} сохранена`); }}
+        onSave={(g) => { updateSettings({ group: g, selection: settings.selection?.groupId === g.id ? settings.selection : null }); setViewGroup(null); setDlg("select"); app.say(`Группа ${g.name} сохранена`); }}
       />
-      <SettingsDialog open={dlg === "settings"} onClose={() => setDlg(null)} classes={classes} onLogin={() => setDlg("auth")} />
+      <SelectionDialog open={dlg === "select"} onClose={() => setDlg(null)} group={settings.group} selection={settings.selection} onSave={(sel) => { updateSettings({ selection: sel }); app.say(sel ? "Расписание обновлено по вашему выбору" : "Показываем всё расписание группы"); }} />
+      <SettingsDialog open={dlg === "settings"} onClose={() => setDlg(null)} classes={chosen} onLogin={() => setDlg("auth")} />
       <AuthDialog open={dlg === "auth"} onClose={() => setDlg(null)} />
 
       <div aria-live="polite" role="status" className="pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4">

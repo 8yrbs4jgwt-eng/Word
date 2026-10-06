@@ -49,6 +49,15 @@ export const settingsSchema = z.object({
   theme: z.enum(["system", "light", "dark"]).default("system"),
   group: z.object({ id: z.number().int(), name: z.string().max(100) }).nullable().default(null),
   view: z.enum(["week", "month", "agenda"]).default("week"),
+  /** выбор дисциплин и подгрупп для сохранённой группы */
+  selection: z
+    .object({
+      groupId: z.number().int(),
+      hidden: z.array(z.string().max(300)).max(300),
+      picks: z.record(z.string().max(400), z.string().max(300)).refine((r) => Object.keys(r).length <= 400),
+    })
+    .nullable()
+    .default(null),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 export const DEFAULT_SETTINGS: Settings = settingsSchema.parse({});

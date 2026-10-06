@@ -6,7 +6,7 @@ async function open(page: Page) {
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 }
 
-async function pickGroup(page: Page) {
+async function pickGroup(page: Page, opts: { keepSelection?: boolean } = {}) {
   await page.getByRole("button", { name: "Выбрать группу" }).first().click();
   const dlg = page.getByRole("dialog", { name: "Найдите свою группу" });
   await dlg.getByLabel("Поиск направления").fill("Математика и компьютерные");
@@ -14,6 +14,10 @@ async function pickGroup(page: Page) {
   await dlg.getByRole("button", { name: /поступление/ }).first().click();
   await dlg.getByRole("button", { name: /^\d\d\.Б/ }).first().click();
   await dlg.getByRole("button", { name: "Это моя группа" }).click();
+  // после сохранения группы сам открывается выбор дисциплин
+  const sel = page.getByRole("dialog", { name: "Мои дисциплины" });
+  await expect(sel).toBeVisible();
+  if (!opts.keepSelection) await sel.getByRole("button", { name: "Пропустить" }).click();
 }
 
 async function addDeadline(page: Page, title: string, opts: { date?: string; time?: string; repeat?: "daily" | "weekly" } = {}) {
@@ -208,4 +212,34 @@ test("мобильный вид: список вместо недельной с
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow).toBe(false);
   await ctx.close();
+});
+
+test("выбор дисциплин и подгрупп собирает расписание из выбранного", async ({ page }) => {
+  await open(page);
+  await pickGroup(page, { keepSelection: true });
+  const sel = page.getByRole("dialog", { name: "Мои дисциплины" });
+  await expect(sel.getByRole("checkbox", { name: /Английский язык/ })).toBeVisible();
+
+  // подгруппа: в понедельник в 11:15 идёт 7 параллельных «английских» — выбираем один вариант
+  const slot = sel.getByRole("group", { name: /Английский язык, практическое занятие · Пн 11:15/ });
+  await expect(slot.getByRole("radio")).toHaveCount(8); // 7 преподавателей + «не хожу»
+  await slot.getByRole("radio").first().check();
+  // дисциплина, которую не посещаю
+  await sel.getByRole("checkbox", { name: /Алгебра/ }).uncheck();
+  await sel.getByRole("button", { name: "Сохранить" }).click();
+  await expect(page.getByText("Расписание обновлено по вашему выбору")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Список" }).click();
+  await expect(page.getByRole("button", { name: /^Пара, / }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Пара, .*Алгебра/ })).toHaveCount(0);
+  const monday = page.getByRole("button", { name: /^Пара, 11:15–12:50, Английский язык, практическое занятие/ });
+  expect(await monday.count()).toBeLessThanOrEqual(2); // два понедельника в двух неделях списка, по одному варианту
+
+  await page.reload();
+  await expect(page.getByRole("button", { name: /^Пара, .*Алгебра/ })).toHaveCount(0);
+
+  // «Показывать всё» возвращает всё расписание
+  await page.getByRole("button", { name: "Мои дисциплины и подгруппы" }).click();
+  await page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("button", { name: "Показывать всё" }).click();
+  await expect(page.getByRole("button", { name: /^Пара, .*Алгебра/ }).first()).toBeVisible();
 });

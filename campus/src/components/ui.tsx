@@ -66,17 +66,26 @@ export function Modal({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  // Событие close срабатывает и при программном закрытии — тогда onClose звать нельзя,
+  // иначе оно сбросит только что открытое следующее окно.
+  const programmatic = useRef(false);
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
     if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
+    if (!open && d.open) {
+      programmatic.current = true;
+      d.close();
+    }
   }, [open]);
   return (
     <dialog
       ref={ref}
       aria-labelledby={titleId}
-      onClose={onClose}
+      onClose={() => {
+        if (programmatic.current) programmatic.current = false;
+        else onClose();
+      }}
       onClick={(e) => e.target === ref.current && onClose()}
       className={cx(
         "m-auto w-[calc(100%-1.5rem)] rounded-2xl border border-border bg-surface p-0 shadow-2xl max-h-[92dvh] overflow-y-auto",
