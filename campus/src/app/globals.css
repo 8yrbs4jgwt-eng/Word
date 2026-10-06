@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* Токены. Светлая тема по умолчанию; тёмная — по системе или вручную через data-theme. */
+:root {
+  --bg: #f4f7fc;
+  --surface: #ffffff;
+  --surface-2: #eef2fa;
+  --text: #121c36;
+  --muted: #55627d;
+  --border: #d9e0ee;
+  --primary: #2350d8;
+  --on-primary: #ffffff;
+  --primary-soft: #e4ecff;
+  --danger: #b3261e;
+  --danger-soft: #fdeceb;
+  --ok: #17703f;
+
+  --class-bg: #e4ecff;
+  --class-fg: #1a3a9c;
+  --class-bar: #2f62ea;
+  --deadline-bg: #fff0d9;
+  --deadline-fg: #7a4708;
+  --deadline-bar: #c46f0a;
+  --note-bg: #f0e9fd;
+  --note-fg: #58389a;
+  --note-bar: #8a62d6;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1325;
+    --surface: #131c33;
+    --surface-2: #1a2540;
+    --text: #e7ecf8;
+    --muted: #9eabc6;
+    --border: #28375a;
+    --primary: #86a8ff;
+    --on-primary: #0a1430;
+    --primary-soft: #1c2c57;
+    --danger: #ff9b92;
+    --danger-soft: #3b1c1f;
+    --ok: #6fd69a;
+
+    --class-bg: #1b2c5a;
+    --class-fg: #bdd0ff;
+    --class-bar: #6f97ff;
+    --deadline-bg: #3b2a0f;
+    --deadline-fg: #ffd69c;
+    --deadline-bar: #f0a548;
+    --note-bg: #2d2252;
+    --note-fg: #dac8ff;
+    --note-bar: #a98aee;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c1325;
+  --surface: #131c33;
+  --surface-2: #1a2540;
+  --text: #e7ecf8;
+  --muted: #9eabc6;
+  --border: #28375a;
+  --primary: #86a8ff;
+  --on-primary: #0a1430;
+  --primary-soft: #1c2c57;
+  --danger: #ff9b92;
+  --danger-soft: #3b1c1f;
+  --ok: #6fd69a;
+
+  --class-bg: #1b2c5a;
+  --class-fg: #bdd0ff;
+  --class-bar: #6f97ff;
+  --deadline-bg: #3b2a0f;
+  --deadline-fg: #ffd69c;
+  --deadline-bar: #f0a548;
+  --note-bg: #2d2252;
+  --note-fg: #dac8ff;
+  --note-bar: #a98aee;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+  --color-class-bg: var(--class-bg);
+  --color-class-fg: var(--class-fg);
+  --color-class-bar: var(--class-bar);
+  --color-deadline-bg: var(--deadline-bg);
+  --color-deadline-fg: var(--deadline-fg);
+  --color-deadline-bar: var(--deadline-bar);
+  --color-note-bg: var(--note-bg);
+  --color-note-fg: var(--note-fg);
+  --color-note-bar: var(--note-bar);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+
+html {
+  background: var(--bg);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Фокус: заметный контур для всех интерактивных элементов */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+dialog {
+  color: var(--text);
+}
+dialog::backdrop {
+  background: rgb(8 14 30 / 0.55);
+  backdrop-filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.sr-only-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
