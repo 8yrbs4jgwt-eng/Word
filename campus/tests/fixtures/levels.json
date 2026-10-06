@@ -1,0 +1,70 @@
+[
+ {
+  "StudyLevelName": "Бакалавриат",
+  "StudyLevelNameEnglish": "bachelor studies",
+  "HasCourse6": true,
+  "StudyProgramCombinations": [
+   {
+    "Name": "Mathematics and Artificial Intelligence / Математика и искусственный интеллект",
+    "NameEnglish": "Mathematics and Artificial Intelligence",
+    "AdmissionYears": [
+     {
+      "StudyProgramId": 13857,
+      "YearName": "2022",
+      "YearNumber": 2022,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     },
+     {
+      "StudyProgramId": 12978,
+      "YearName": "2021",
+      "YearNumber": 2021,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     },
+     {
+      "StudyProgramId": 12084,
+      "YearName": "2020",
+      "YearNumber": 2020,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     }
+    ]
+   },
+   {
+    "Name": "Искусственный интеллект и наука о данных",
+    "NameEnglish": "Artificial Intelligence and Data Science",
+    "AdmissionYears": [
+     {
+      "StudyProgramId": 18733,
+      "YearName": "2026",
+      "YearNumber": 2026,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     },
+     {
+      "StudyProgramId": 17291,
+      "YearName": "2025",
+      "YearNumber": 2025,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     },
+     {
+      "StudyProgramId": 16545,
+      "YearName": "2024",
+      "YearNumber": 2024,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     },
+     {
+      "StudyProgramId": 13815,
+      "YearName": "2023",
+      "YearNumber": 2023,
+      "IsEmpty": false,
+      "PublicDivisionAlias": "MATH"
+     }
+    ]
+   }
+  ]
+ }
+]
