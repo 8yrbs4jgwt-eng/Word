@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { buildCatalog, disciplineOf, NONE, type Selection } from "@/lib/selection";
+import { buildCatalog, disciplineOf, displayName, NONE, type Selection } from "@/lib/selection";
 import { addDays, todayIn } from "@/lib/time";
 import { Banner, Button, Modal, cx, inputCls } from "@/components/ui";
 import { useClasses } from "@/components/useClasses";
@@ -56,8 +56,8 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
 
           {electiveList.length > 0 && (
             <section aria-labelledby="sel-e" className="space-y-2">
-              <h3 id="sel-e" className="eyebrow">Элективы (дисциплины по выбору)</h3>
-              <p className="text-sm text-muted">Отметьте только те, на которые вы записаны. Остальные элективы в расписании не покажутся.</p>
+              <h3 id="sel-e" className="eyebrow">Элективы и факультативы</h3>
+              <p className="text-sm text-muted">Отметьте только те, на которые вы записаны. Остальные в расписании не покажутся.</p>
               <ul className="space-y-1.5">
                 {electiveList.filter((d) => !qq || d.name.toLowerCase().includes(qq)).map((d) => {
                   const on = electives.includes(d.name);
@@ -66,8 +66,8 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
                       <label className={cx("flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-2.5", on ? "border-primary bg-primary-soft" : "border-border")}>
                         <input type="checkbox" className="mt-1 size-5 accent-[var(--primary)]" checked={on} onChange={() => toggleElective(d.name)} />
                         <span className="min-w-0 flex-1">
-                          <span className="block font-medium">{d.name}</span>
-                          <span className="block text-xs text-muted">{d.kinds.join(", ") || "занятия"} · {d.count} за 4 недели</span>
+                          <span className="block font-medium">{displayName(d.name)}</span>
+                          <span className="block text-xs text-muted">{/^факультатив/i.test(d.name) ? "факультатив" : "электив"} · {d.kinds.join(", ") || "занятия"} · {d.count} за 4 недели</span>
                         </span>
                       </label>
                     </li>

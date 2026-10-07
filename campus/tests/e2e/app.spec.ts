@@ -248,7 +248,7 @@ test("элективы: показываются только отмеченны
   await open(page);
   await pickGroup(page, { keepSelection: true });
   const sel = page.getByRole("dialog", { name: "Мои дисциплины" });
-  const electives = sel.getByRole("region", { name: "Элективы (дисциплины по выбору)" });
+  const electives = sel.getByRole("region", { name: "Элективы и факультативы" });
   await expect(electives.getByRole("checkbox", { name: /Информатика/ })).toBeVisible();
   // в общем списке дисциплин электива нет — он выбирается только в своём блоке
   await expect(sel.getByRole("region", { name: "Дисциплины", exact: true }).getByRole("checkbox", { name: /Информатика/ })).toHaveCount(0);

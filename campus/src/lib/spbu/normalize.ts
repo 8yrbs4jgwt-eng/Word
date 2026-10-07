@@ -50,6 +50,13 @@ function hash(s: string): string {
   return (h >>> 0).toString(36);
 }
 
+/**
+ * Дисциплины по выбору. Флаг IsElective в API бывает не выставлен, а на сайте элективы и
+ * факультативы отмечены префиксом в названии («Электив. …», «Факультатив. …») — учитываем и то и другое.
+ */
+export const OPTIONAL_PREFIX = /^(электив|факультатив)\.\s*/i;
+export const isOptionalCourse = (title: string, flag = false) => flag || OPTIONAL_PREFIX.test(title);
+
 export function normalizeEvents(raw: unknown, groupId: number): ClassEvent[] {
   const out: ClassEvent[] = [];
   for (const day of arr(obj(raw).Days)) {
@@ -70,7 +77,7 @@ export function normalizeEvents(raw: unknown, groupId: number): ClassEvent[] {
         location,
         teacher: str(ev.EducatorsDisplayText),
         cancelled: ev.IsCancelled === true,
-        elective: ev.IsElective === true,
+        elective: isOptionalCourse(title, ev.IsElective === true),
       });
     }
   }
