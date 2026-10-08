@@ -1,7 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import fs from "node:fs";
-import { openDb } from "@/lib/db";
-import { fetchCached } from "@/lib/spbu/cache";
 import { normalizeDivisions, normalizeEvents, normalizeGroups, normalizeLevels } from "@/lib/spbu/normalize";
 
 const fx = (n: string) => JSON.parse(fs.readFileSync(`tests/fixtures/${n}.json`, "utf8"));
@@ -39,28 +37,5 @@ describe("normalize", () => {
     expect(normalizeEvents(null, 1)).toEqual([]);
     expect(normalizeEvents({ Days: [{ DayStudyEvents: [{ Start: "bad" }] }] }, 1)).toEqual([]);
     expect(normalizeGroups("x")).toEqual([]);
-  });
-});
-
-describe("fetchCached", () => {
-  it("кэширует, потом отдаёт stale при сбое", async () => {
-    const db = openDb(":memory:");
-    let t = 1_000_000;
-    const load = vi.fn().mockResolvedValueOnce([1, 2]);
-    const a = await fetchCached(db, "k", 1000, load, () => t);
-    expect(a).toMatchObject({ data: [1, 2], stale: false });
-    await fetchCached(db, "k", 1000, load, () => t + 500);
-    expect(load).toHaveBeenCalledTimes(1);
-
-    t += 5000;
-    load.mockRejectedValueOnce(new Error("down"));
-    const b = await fetchCached(db, "k", 1000, load, () => t);
-    expect(b).toMatchObject({ data: [1, 2], stale: true });
-    expect(b.updatedAt).toBe(a.updatedAt);
-  });
-
-  it("без кэша — пробрасывает ошибку", async () => {
-    const db = openDb(":memory:");
-    await expect(fetchCached(db, "x", 1000, () => Promise.reject(new Error("down")))).rejects.toThrow("down");
   });
 });

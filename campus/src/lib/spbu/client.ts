@@ -37,24 +37,22 @@ export async function getJson(path: string, attempts = 3, timeoutMs = 10_000): P
   throw last instanceof Error ? last : new UpstreamError("timetable.spbu.ru недоступен");
 }
 
-const db = () => getDb();
+export const getDivisions = async (): Promise<Cached<Division[]>> =>
+  fetchCached(await getDb(), "divisions", 24 * HOUR, async () => normalizeDivisions(await getJson("/study/divisions")));
 
-export const getDivisions = (): Promise<Cached<Division[]>> =>
-  fetchCached(db(), "divisions", 24 * HOUR, async () => normalizeDivisions(await getJson("/study/divisions")));
-
-export const getPrograms = (alias: string): Promise<Cached<ProgramLevel[]>> =>
-  fetchCached(db(), `programs:${alias}`, 24 * HOUR, async () =>
+export const getPrograms = async (alias: string): Promise<Cached<ProgramLevel[]>> =>
+  fetchCached(await getDb(), `programs:${alias}`, 24 * HOUR, async () =>
     normalizeLevels(await getJson(`/study/divisions/${alias}/programs/levels`)),
   );
 
-export const getGroups = (programId: number): Promise<Cached<Group[]>> =>
-  fetchCached(db(), `groups:${programId}`, 24 * HOUR, async () =>
+export const getGroups = async (programId: number): Promise<Cached<Group[]>> =>
+  fetchCached(await getDb(), `groups:${programId}`, 24 * HOUR, async () =>
     normalizeGroups(await getJson(`/programs/${programId}/groups`)),
   );
 
 /** weekMonday — YYYY-MM-DD понедельника (по Москве). */
-export const getWeekEvents = (groupId: number, weekMonday: string): Promise<Cached<ClassEvent[]>> =>
-  fetchCached(db(), `events:${groupId}:${weekMonday}`, 15 * 60_000, async () => {
+export const getWeekEvents = async (groupId: number, weekMonday: string): Promise<Cached<ClassEvent[]>> =>
+  fetchCached(await getDb(), `events:${groupId}:${weekMonday}`, 15 * 60_000, async () => {
     const end = addDays(weekMonday, 6);
     return normalizeEvents(await getJson(`/groups/${groupId}/events/${weekMonday}/${end}`), groupId);
   });

@@ -8,6 +8,6 @@ export async function PUT(req: Request) {
   if (!u) return bad("Нужно войти", 401);
   const parsed = settingsSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return bad("Некорректные настройки");
-  getDb().prepare("UPDATE users SET settings = ? WHERE id = ?").run(JSON.stringify(parsed.data), u.id);
+  await (await getDb()).run("UPDATE users SET settings = ? WHERE id = ?", JSON.stringify(parsed.data), u.id);
   return json(parsed.data);
 }

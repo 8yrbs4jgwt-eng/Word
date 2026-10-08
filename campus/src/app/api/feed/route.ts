@@ -11,11 +11,11 @@ import { addDays, mondayOf, todayIn } from "@/lib/time";
 /** Подписка на календарь: /api/feed?token=… — личные записи и пары сохранённой группы. */
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token") ?? "";
-  const db = getDb();
-  const user = token ? userByFeedToken(db, token) : null;
+  const db = await getDb();
+  const user = token ? await userByFeedToken(db, token) : null;
   if (!user) return new Response("Not found", { status: 404 });
 
-  const rows = db.prepare("SELECT data FROM entries WHERE user_id = ?").all(user.id) as { data: string }[];
+  const rows = await db.all<{ data: string }>("SELECT data FROM entries WHERE user_id = ?", user.id);
   const entries: Entry[] = rows.flatMap((r) => {
     const p = entrySchema.safeParse(JSON.parse(r.data));
     return p.success ? [p.data] : [];

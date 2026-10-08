@@ -1,35 +1,37 @@
 import "server-only";
 import webpush from "web-push";
-import type Database from "better-sqlite3";
-import { getDb } from "@/lib/db";
+import { getDb, type Db } from "@/lib/db";
 import { entrySchema, type Entry } from "@/lib/entries";
 import { dueReminders } from "@/lib/reminders";
 
 type Vapid = { publicKey: string; privateKey: string };
 
 /** VAPID-ключи берём из окружения, иначе генерируем один раз и храним в БД. */
-export function getVapid(db: Database.Database = getDb()): Vapid {
+export async function getVapid(db?: Db): Promise<Vapid> {
   if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     return { publicKey: process.env.VAPID_PUBLIC_KEY, privateKey: process.env.VAPID_PRIVATE_KEY };
   }
-  const row = db.prepare("SELECT value FROM cache WHERE key = 'vapid'").get() as { value: string } | undefined;
+  const d = db ?? (await getDb());
+  const row = await d.get<{ value: string }>("SELECT value FROM cache WHERE key = 'vapid'");
   if (row) return JSON.parse(row.value) as Vapid;
   const keys = webpush.generateVAPIDKeys();
-  db.prepare("INSERT INTO cache(key,value,fetched_at) VALUES('vapid',?,?)").run(JSON.stringify(keys), Date.now());
-  return keys;
+  // при гонке двух процессов выигрывает первый; перечитываем, чтобы все использовали одни ключи
+  await d.run("INSERT INTO cache(key,value,fetched_at) VALUES('vapid',?,?) ON CONFLICT(key) DO NOTHING", JSON.stringify(keys), Date.now());
+  const saved = await d.get<{ value: string }>("SELECT value FROM cache WHERE key = 'vapid'");
+  return saved ? (JSON.parse(saved.value) as Vapid) : keys;
 }
 
-function configure(db: Database.Database) {
-  const v = getVapid(db);
+async function configure(db: Db) {
+  const v = await getVapid(db);
   webpush.setVapidDetails(process.env.VAPID_SUBJECT ?? "mailto:admin@example.com", v.publicKey, v.privateKey);
 }
 
 type Payload = { title: string; body: string; tag?: string; url?: string };
 
 /** Шлёт уведомление всем устройствам пользователя; мёртвые подписки удаляет. Возвращает число доставленных. */
-export async function sendToUser(db: Database.Database, userId: string, payload: Payload): Promise<number> {
-  configure(db);
-  const subs = db.prepare("SELECT endpoint, subscription FROM push_subscriptions WHERE user_id = ?").all(userId) as { endpoint: string; subscription: string }[];
+export async function sendToUser(db: Db, userId: string, payload: Payload): Promise<number> {
+  await configure(db);
+  const subs = await db.all<{ endpoint: string; subscription: string }>("SELECT endpoint, subscription FROM push_subscriptions WHERE user_id = ?", userId);
   let ok = 0;
   await Promise.all(
     subs.map(async (s) => {
@@ -38,7 +40,7 @@ export async function sendToUser(db: Database.Database, userId: string, payload:
         ok++;
       } catch (e) {
         const status = (e as { statusCode?: number }).statusCode;
-        if (status === 404 || status === 410) db.prepare("DELETE FROM push_subscriptions WHERE endpoint = ?").run(s.endpoint);
+        if (status === 404 || status === 410) await db.run("DELETE FROM push_subscriptions WHERE endpoint = ?", s.endpoint);
       }
     }),
   );
@@ -46,24 +48,24 @@ export async function sendToUser(db: Database.Database, userId: string, payload:
 }
 
 /** Один проход планировщика. Вызывается раз в минуту из instrumentation.ts. */
-export async function runReminders(db: Database.Database = getDb(), now = Date.now()): Promise<number> {
-  const users = db.prepare("SELECT DISTINCT user_id FROM push_subscriptions").all() as { user_id: string }[];
+export async function runReminders(db?: Db, now = Date.now()): Promise<number> {
+  const d = db ?? (await getDb());
+  const users = await d.all<{ user_id: string }>("SELECT DISTINCT user_id FROM push_subscriptions");
   let sent = 0;
-  const seen = db.prepare("SELECT 1 FROM reminders_sent WHERE key = ?");
-  const mark = db.prepare("INSERT OR IGNORE INTO reminders_sent(key, sent_at) VALUES(?,?)");
   for (const { user_id } of users) {
-    const rows = db.prepare("SELECT data FROM entries WHERE user_id = ?").all(user_id) as { data: string }[];
+    const rows = await d.all<{ data: string }>("SELECT data FROM entries WHERE user_id = ?", user_id);
     const entries: Entry[] = rows.flatMap((r) => {
       const p = entrySchema.safeParse(JSON.parse(r.data));
       return p.success ? [p.data] : [];
     });
-    for (const d of dueReminders(entries, now)) {
-      const key = `${user_id}:${d.key}`;
-      if (seen.get(key)) continue;
-      mark.run(key, now);
-      if (await sendToUser(db, user_id, { title: d.title, body: d.body, tag: d.key, url: "/" })) sent++;
+    for (const due of dueReminders(entries, now)) {
+      const key = `${user_id}:${due.key}`;
+      // «отметиться, что отправили» одним атомарным запросом: вставилась строка — значит мы первые
+      const first = await d.run("INSERT INTO reminders_sent(key, sent_at) VALUES(?,?) ON CONFLICT(key) DO NOTHING", key, now);
+      if (!first) continue;
+      if (await sendToUser(d, user_id, { title: due.title, body: due.body, tag: due.key, url: "/" })) sent++;
     }
   }
-  db.prepare("DELETE FROM reminders_sent WHERE sent_at < ?").run(now - 30 * 86400_000);
+  await d.run("DELETE FROM reminders_sent WHERE sent_at < ?", now - 30 * 86400_000);
   return sent;
 }

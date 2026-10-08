@@ -1,8 +1,7 @@
 import "server-only";
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import type Database from "better-sqlite3";
-import { getDb } from "@/lib/db";
+import { getDb, type Db } from "@/lib/db";
 import { DEFAULT_SETTINGS, settingsSchema, type Settings } from "@/lib/entries";
 
 export const SESSION_COOKIE = "campus_session";
@@ -26,23 +25,21 @@ export function verifyPassword(password: string, stored: string): boolean {
 
 const sha = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
 
-export function createUser(db: Database.Database, email: string, password: string, name: string): User | null {
+export async function createUser(db: Db, email: string, password: string, name: string): Promise<User | null> {
   const id = crypto.randomUUID();
   const feedToken = crypto.randomBytes(24).toString("base64url");
-  try {
-    db.prepare("INSERT INTO users(id,email,password_hash,name,settings,feed_token,created_at) VALUES(?,?,?,?,?,?,?)").run(
-      id,
-      email,
-      hashPassword(password),
-      name,
-      JSON.stringify(DEFAULT_SETTINGS),
-      feedToken,
-      Date.now(),
-    );
-  } catch {
-    return null; // email занят
-  }
-  return { id, email, name, feedToken, settings: DEFAULT_SETTINGS };
+  // email уникален: занятый адрес не вставится (ON CONFLICT DO NOTHING → 0 строк), без разбора текстов ошибок разных БД
+  const n = await db.run(
+    "INSERT INTO users(id,email,password_hash,name,settings,feed_token,created_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(email) DO NOTHING",
+    id,
+    email,
+    hashPassword(password),
+    name,
+    JSON.stringify(DEFAULT_SETTINGS),
+    feedToken,
+    Date.now(),
+  );
+  return n === 0 ? null : { id, email, name, feedToken, settings: DEFAULT_SETTINGS };
 }
 
 type UserRow = { id: string; email: string; name: string; feed_token: string; settings: string; password_hash?: string };
@@ -54,32 +51,32 @@ const toUser = (r: UserRow): User => {
   return { id: r.id, email: r.email, name: r.name, feedToken: r.feed_token, settings };
 };
 
-export function authenticate(db: Database.Database, email: string, password: string): User | null {
-  const row = db.prepare("SELECT * FROM users WHERE email = ?").get(email) as UserRow | undefined;
+export async function authenticate(db: Db, email: string, password: string): Promise<User | null> {
+  const row = await db.get<UserRow>("SELECT * FROM users WHERE email = ?", email);
   // Считаем хэш даже для несуществующего пользователя, чтобы не выдавать наличие email по времени ответа
   const ok = verifyPassword(password, row?.password_hash ?? "scrypt$00$00");
   return row && ok ? toUser(row) : null;
 }
 
-export function startSession(db: Database.Database, userId: string): { token: string; expires: Date } {
+export async function startSession(db: Db, userId: string): Promise<{ token: string; expires: Date }> {
   const token = crypto.randomBytes(32).toString("base64url");
   const expires = new Date(Date.now() + SESSION_DAYS * 86400_000);
-  db.prepare("DELETE FROM sessions WHERE expires_at < ?").run(Date.now());
-  db.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,?)").run(sha(token), userId, expires.getTime());
+  await db.run("DELETE FROM sessions WHERE expires_at < ?", Date.now());
+  await db.run("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,?)", sha(token), userId, expires.getTime());
   return { token, expires };
 }
 
-export function userByToken(db: Database.Database, token: string): User | null {
-  const row = db
-    .prepare(
-      "SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?",
-    )
-    .get(sha(token), Date.now()) as UserRow | undefined;
+export async function userByToken(db: Db, token: string): Promise<User | null> {
+  const row = await db.get<UserRow>(
+    "SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?",
+    sha(token),
+    Date.now(),
+  );
   return row ? toUser(row) : null;
 }
 
-export function userByFeedToken(db: Database.Database, token: string): User | null {
-  const row = db.prepare("SELECT * FROM users WHERE feed_token = ?").get(token) as UserRow | undefined;
+export async function userByFeedToken(db: Db, token: string): Promise<User | null> {
+  const row = await db.get<UserRow>("SELECT * FROM users WHERE feed_token = ?", token);
   return row ? toUser(row) : null;
 }
 
@@ -95,13 +92,13 @@ export async function setSessionCookie(token: string, expires: Date) {
 
 export async function currentUser(): Promise<User | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return token ? userByToken(getDb(), token) : null;
+  return token ? userByToken(await getDb(), token) : null;
 }
 
 export async function endSession() {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
-  if (token) getDb().prepare("DELETE FROM sessions WHERE token_hash = ?").run(sha(token));
+  if (token) await (await getDb()).run("DELETE FROM sessions WHERE token_hash = ?", sha(token));
   jar.delete(SESSION_COOKIE);
 }
 

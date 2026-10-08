@@ -26,7 +26,12 @@ export default defineConfig({
       port: PORT,
       timeout: 240_000,
       reuseExistingServer: !process.env.CI,
-      env: { SPBU_BASE_URL: "http://localhost:4010/api/v1", DATABASE_PATH: ".e2e-data/e2e.db", COOKIE_SECURE: "false" },
+      env: {
+        SPBU_BASE_URL: "http://localhost:4010/api/v1",
+        COOKIE_SECURE: "false",
+        // E2E_DATABASE_URL=postgres://… — прогнать сценарии на Postgres, иначе SQLite
+        ...(process.env.E2E_DATABASE_URL ? { DATABASE_URL: process.env.E2E_DATABASE_URL } : { DATABASE_PATH: ".e2e-data/e2e.db" }),
+      },
     },
   ],
 });

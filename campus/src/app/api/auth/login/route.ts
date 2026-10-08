@@ -10,10 +10,10 @@ export async function POST(req: Request) {
   if (!parsed.success) return bad("Введите email и пароль");
   const ip = req.headers.get("x-forwarded-for") ?? "local";
   if (rateLimited(`login:${ip}:${parsed.data.email}`)) return bad("Слишком много попыток. Подождите минуту.", 429);
-  const db = getDb();
-  const user = authenticate(db, parsed.data.email, parsed.data.password);
+  const db = await getDb();
+  const user = await authenticate(db, parsed.data.email, parsed.data.password);
   if (!user) return bad("Неверный email или пароль", 401);
-  const s = startSession(db, user.id);
+  const s = await startSession(db, user.id);
   await setSessionCookie(s.token, s.expires);
   return json({ user: { id: user.id, email: user.email, name: user.name }, settings: user.settings, feedToken: user.feedToken });
 }
