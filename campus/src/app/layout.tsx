@@ -3,10 +3,10 @@ import { PwaRegister } from "@/components/PwaRegister";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Кампус — расписание и дедлайны",
+  title: "Лекторий — расписание и дедлайны",
   description: "Личный учебный календарь студента СПбГУ: пары, дедлайны, заметки и напоминания.",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Кампус", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Лекторий", statusBarStyle: "default" },
   icons: { icon: "/icon.svg", apple: "/icon-192.png" },
 };
 

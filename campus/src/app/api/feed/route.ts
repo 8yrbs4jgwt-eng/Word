@@ -33,10 +33,10 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  return new Response(buildIcs({ name: "Кампус", entries, classes }), {
+  return new Response(buildIcs({ name: "Лекторий", entries, classes }), {
     headers: {
       "content-type": "text/calendar; charset=utf-8",
-      "content-disposition": 'inline; filename="campus.ics"',
+      "content-disposition": 'inline; filename="lektorij.ics"',
       "cache-control": "private, max-age=900",
     },
   });

@@ -148,8 +148,8 @@ export function CalendarApp() {
       <a href="#main" className="sr-only-focusable rounded-lg bg-primary px-3 py-2 text-on-primary">К содержимому</a>
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2 py-4">
         <div className="flex items-center gap-2.5">
-          <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-primary text-on-primary font-display text-xl font-bold">К</span>
-          <span className="font-display text-2xl font-semibold tracking-tight">Кампус</span>
+          <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-primary text-on-primary font-display text-xl font-bold">Л</span>
+          <span className="font-display text-2xl font-semibold tracking-tight">Лекторий</span>
         </div>
         <div className="relative order-3 w-full md:order-none md:ml-4 md:w-80">
           <Search size={16} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />

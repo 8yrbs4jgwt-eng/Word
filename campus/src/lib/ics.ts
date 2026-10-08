@@ -90,7 +90,7 @@ export function buildIcs(opts: { name: string; entries: Entry[]; classes?: Class
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Кампус//Расписание и дедлайны//RU",
+    "PRODID:-//Лекторий//Расписание и дедлайны//RU",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${esc(opts.name)}`,

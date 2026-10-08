@@ -32,13 +32,13 @@ export function SettingsDialog({ open, onClose, classes, onLogin }: { open: bool
   const device = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "Europe/Moscow";
 
   function download() {
-    const blob = new Blob([buildIcs({ name: "Кампус", entries, classes })], { type: "text/calendar;charset=utf-8" });
+    const blob = new Blob([buildIcs({ name: "Лекторий", entries, classes })], { type: "text/calendar;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "campus.ics";
+    a.download = "lektorij.ics";
     a.click();
     URL.revokeObjectURL(a.href);
-    say("Файл campus.ics скачан");
+    say("Файл lektorij.ics скачан");
   }
 
   const feedUrl = feedToken && typeof location !== "undefined" ? `${location.origin}/api/feed?token=${feedToken}` : null;

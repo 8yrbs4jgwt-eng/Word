@@ -1,4 +1,4 @@
-/* Кампус — service worker: офлайн-оболочка и push-уведомления. */
+/* Лекторий — service worker: офлайн-оболочка и push-уведомления. */
 const VERSION = "v1";
 const SHELL = `campus-shell-${VERSION}`;
 const STATIC = `campus-static-${VERSION}`;
@@ -54,7 +54,7 @@ self.addEventListener("fetch", (e) => {
 });
 
 self.addEventListener("push", (e) => {
-  let d = { title: "Кампус", body: "", tag: undefined, url: "/" };
+  let d = { title: "Лекторий", body: "", tag: undefined, url: "/" };
   try {
     d = { ...d, ...e.data.json() };
   } catch {}
