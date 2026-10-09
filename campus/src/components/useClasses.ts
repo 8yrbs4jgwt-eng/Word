@@ -22,7 +22,7 @@ export function useClasses(groupId: number | null, from: string, to: string) {
   useEffect(() => {
     if (!groupId) return;
     let cancelled = false;
-    const missing = needed.filter((w) => !weeks[`${groupId}:${w}`] || (weeks[`${groupId}:${w}`].failed && nonce > 0));
+    const missing = needed.filter((w) => !weeks[`${groupId}:${w}`]);
     if (!missing.length) return;
     Promise.all(missing.map(async (w) => [w, await loadWeek(groupId, w)] as const)).then((res) => {
       if (cancelled) return;
@@ -40,9 +40,11 @@ export function useClasses(groupId: number | null, from: string, to: string) {
   const classes: ClassEvent[] = useMemo(() => loaded.flatMap((r) => r.events), [loaded]);
   const failed = loaded.some((r) => r.failed);
   const staleAt = loaded.filter((r) => r.stale && r.updatedAt).map((r) => r.updatedAt as string).sort()[0] ?? null;
+  const staleError = loaded.find((r) => r.stale && r.error)?.error ?? null;
+  // «Повторить/Обновить»: забываем и неудавшиеся, и устаревшие недели — они загрузятся заново
   const retry = useCallback(() => {
-    setWeeks((prev) => Object.fromEntries(Object.entries(prev).filter(([, v]) => !v.failed)));
+    setWeeks((prev) => Object.fromEntries(Object.entries(prev).filter(([, v]) => !v.failed && !v.stale)));
     setNonce((n) => n + 1);
   }, []);
-  return { classes, loading, failed, staleAt, retry };
+  return { classes, loading, failed, staleAt, staleError, retry };
 }

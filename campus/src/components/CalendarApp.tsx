@@ -97,7 +97,7 @@ export function CalendarApp() {
     return [anchor, addDays(anchor, 13)];
   }, [view, anchor]);
 
-  const { classes, loading, failed, staleAt, retry } = useClasses(group?.id ?? null, from, to);
+  const { classes, loading, failed, staleAt, staleError, retry } = useClasses(group?.id ?? null, from, to);
 
   // выбор дисциплин и подгрупп применяется только к своей сохранённой группе
   const chosen = useMemo(() => applySelection(classes, settings.selection, group?.id ?? null), [classes, settings.selection, group?.id]);
@@ -196,7 +196,12 @@ export function CalendarApp() {
             </Banner>
           )}
           {failed && <Banner tone="error" action={<Button size="sm" onClick={retry}>Повторить</Button>}>Не удалось загрузить расписание, и сохранённой копии ещё нет.</Banner>}
-          {staleAt && !failed && <Banner tone="warn" action={<Button size="sm" onClick={retry}>Обновить</Button>}>Расписание СПбГУ сейчас недоступно — показана копия от {new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: tz }).format(new Date(staleAt))}.</Banner>}
+          {staleAt && !failed && (
+            <Banner tone="warn" action={<Button size="sm" onClick={retry} disabled={loading}>{loading ? "Обновляем…" : "Обновить"}</Button>}>
+              Не удалось получить свежее расписание — показана сохранённая копия от {new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: tz }).format(new Date(staleAt))}.
+              {staleError && <span className="block text-xs opacity-80">Причина: {staleError}.</span>}
+            </Banner>
+          )}
 
           <div className="flex flex-wrap items-center gap-2" role="toolbar" aria-label="Навигация по календарю">
             <Button size="sm" onClick={() => { setDate(null); setSelected(null); }}>Сегодня</Button>

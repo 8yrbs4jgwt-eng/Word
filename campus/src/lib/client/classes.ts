@@ -1,7 +1,7 @@
 import type { Cached, ClassEvent } from "@/lib/spbu/types";
 import { lsGet, lsSet } from "./storage";
 
-export type WeekResult = { events: ClassEvent[]; updatedAt: string | null; stale: boolean; failed: boolean };
+export type WeekResult = { events: ClassEvent[]; updatedAt: string | null; stale: boolean; failed: boolean; error?: string };
 
 const key = (g: number, w: string) => `campus:classes:${g}:${w}`;
 
@@ -15,10 +15,10 @@ export async function loadWeek(groupId: number, weekMonday: string): Promise<Wee
     if (!res.ok) throw new Error(String(res.status));
     const body = (await res.json()) as Cached<ClassEvent[]>;
     if (!body.stale) lsSet(key(groupId, weekMonday), { events: body.data, updatedAt: body.updatedAt });
-    return { events: body.data, updatedAt: body.updatedAt, stale: body.stale, failed: false };
+    return { events: body.data, updatedAt: body.updatedAt, stale: body.stale, failed: false, error: body.error };
   } catch {
     const saved = lsGet<{ events: ClassEvent[]; updatedAt: string } | null>(key(groupId, weekMonday), null);
-    if (saved) return { events: saved.events, updatedAt: saved.updatedAt, stale: true, failed: false };
+    if (saved) return { events: saved.events, updatedAt: saved.updatedAt, stale: true, failed: false, error: "нет связи с сервером" };
     return { events: [], updatedAt: null, stale: false, failed: true };
   }
 }

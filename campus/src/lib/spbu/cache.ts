@@ -5,6 +5,16 @@ const inflight = new Map<string, Promise<unknown>>();
 
 type Row = { value: string; fetched_at: number };
 
+/** Короткое описание сбоя для пользователя и диагностики (без адресов и секретов). */
+export function describeError(err: unknown): string {
+  if (!(err instanceof Error)) return "неизвестная ошибка";
+  const code = (err as { cause?: { code?: string } }).cause?.code;
+  if (err.name === "TimeoutError" || err.name === "AbortError") return "сайт СПбГУ не ответил вовремя";
+  const status = (err as { status?: number }).status;
+  if (status) return `сайт СПбГУ ответил с ошибкой ${status}`;
+  return `сетевая ошибка${code ? ` (${code})` : ""}`;
+}
+
 /**
  * Читает из кэша (БД), пока запись свежее ttlMs. Иначе грузит заново.
  * Если загрузка упала — отдаёт последний удачный ответ с stale=true.
@@ -45,7 +55,7 @@ export async function fetchCached<T>(
     return { data, updatedAt: new Date(at).toISOString(), stale: false };
   } catch (err) {
     if (row) {
-      return { data: JSON.parse(row.value) as T, updatedAt: new Date(row.fetched_at).toISOString(), stale: true };
+      return { data: JSON.parse(row.value) as T, updatedAt: new Date(row.fetched_at).toISOString(), stale: true, error: describeError(err) };
     }
     throw err;
   }

@@ -26,4 +26,6 @@ export type Cached<T> = {
   updatedAt: string;
   /** true, если сайт университета недоступен и отдан последний удачный ответ */
   stale: boolean;
+  /** коротко, почему не удалось обновить (только когда stale) */
+  error?: string;
 };

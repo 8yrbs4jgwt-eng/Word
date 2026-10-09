@@ -265,3 +265,29 @@ test("элективы: показываются только отмеченны
   await page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("button", { name: "Сохранить" }).click();
   await expect(page.getByRole("button", { name: /^Пара, .*Информатика/ }).first()).toBeVisible();
 });
+
+test("баннер «показана копия»: кнопка «Обновить» перезагружает расписание", async ({ page }) => {
+  await open(page);
+  await pickGroup(page);
+  await page.getByRole("tab", { name: "Список" }).click();
+  await expect(page.getByRole("button", { name: /^Пара, / }).first()).toBeVisible();
+
+  // сервер отвечает «университет недоступен, вот копия» — как на хостинге, когда сайт СПбГУ не отвечает
+  let broken = true;
+  await page.route("**/api/timetable/events*", async (route) => {
+    if (!broken) return route.continue();
+    const res = await route.fetch();
+    const body = await res.json();
+    await route.fulfill({ response: res, json: { ...body, stale: true, updatedAt: "2026-10-08T12:37:00.000Z", error: "сайт СПбГУ не ответил вовремя" } });
+  });
+  await page.getByRole("button", { name: "Сегодня" }).click();
+  await page.getByRole("button", { name: "Вперёд" }).click(); // неделя, которой в кэше браузера ещё нет
+  const banner = page.getByRole("status").filter({ hasText: "показана сохранённая копия" });
+  await expect(banner).toBeVisible();
+  await expect(banner).toContainText("Причина: сайт СПбГУ не ответил вовремя");
+
+  // университет «вернулся» — «Обновить» должна реально перезапросить и убрать баннер
+  broken = false;
+  await banner.getByRole("button", { name: "Обновить" }).click();
+  await expect(page.getByText("показана сохранённая копия")).toHaveCount(0);
+});

@@ -99,3 +99,19 @@ describe.each(backends)("кэш расписания ($name)", ({ open }) => {
     await db.close();
   });
 });
+
+describe.each(backends)("причина сбоя при устаревшей копии ($name)", ({ open }) => {
+  it("stale-ответ содержит короткую причину", async () => {
+    const db = await open();
+    let t = 1;
+    await fetchCached(db, "k", 10, async () => ["ok"], () => t);
+    t = 100;
+    const timeout = Object.assign(new Error("signal timed out"), { name: "TimeoutError" });
+    expect((await fetchCached(db, "k", 10, () => Promise.reject(timeout), () => t)).error).toBe("сайт СПбГУ не ответил вовремя");
+    const http = Object.assign(new Error("x"), { status: 403 });
+    expect((await fetchCached(db, "k", 10, () => Promise.reject(http), () => t)).error).toBe("сайт СПбГУ ответил с ошибкой 403");
+    const net = Object.assign(new Error("fetch failed"), { cause: { code: "ECONNRESET" } });
+    expect((await fetchCached(db, "k", 10, () => Promise.reject(net), () => t)).error).toBe("сетевая ошибка (ECONNRESET)");
+    await db.close();
+  });
+});
