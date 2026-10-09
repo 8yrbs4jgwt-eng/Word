@@ -129,7 +129,7 @@ function Wizard({ onView, onSave, myGroupId }: { onView: (g: { id: number; name:
             {(groups ?? []).map((g) => (
               <li key={g.id}>
                 <button type="button" aria-pressed={picked?.id === g.id} onClick={() => setPicked(g)} className={cx("flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left", picked?.id === g.id ? "border-primary bg-primary-soft" : "border-border hover:bg-surface-2")}>
-                  <span><span className="font-semibold">{g.name}</span>{g.form && <span className="ml-2 text-sm text-muted">{g.form}</span>}{g.profiles && <span className="block text-xs text-muted">{g.profiles}</span>}</span>
+                  <span><span className="font-medium">{g.name}</span>{g.form && <span className="ml-2 text-sm text-muted">{g.form}</span>}{g.profiles && <span className="block text-xs text-muted">{g.profiles}</span>}</span>
                   {g.id === myGroupId && <span className="text-xs text-muted">моя</span>}
                 </button>
               </li>

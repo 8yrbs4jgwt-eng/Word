@@ -104,7 +104,7 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
                 {slots.map((s) => (
                   <li key={s.key}>
                     <fieldset className="rounded-xl border border-border p-3">
-                      <legend className="px-1 text-sm font-semibold">
+                      <legend className="px-1 text-sm font-medium">
                         {s.title} · {WD[s.weekday]} {s.start}{s.end ? `–${s.end}` : ""}
                       </legend>
                       <div className="space-y-1">

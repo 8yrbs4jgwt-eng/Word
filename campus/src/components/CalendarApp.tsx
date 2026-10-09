@@ -151,8 +151,8 @@ export function CalendarApp() {
       <a href="#main" className="sr-only-focusable rounded-lg bg-primary px-3 py-2 text-on-primary">К содержимому</a>
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2 py-4">
         <div className="flex items-center gap-2.5">
-          <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-primary text-on-primary font-display text-xl font-bold">Л</span>
-          <span className="font-display text-2xl font-semibold tracking-tight">Лекторий</span>
+          <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-primary text-on-primary font-display text-2xl font-medium">Л</span>
+          <span className="font-display text-[26px] font-medium sm:text-[28px]">Лекторий</span>
         </div>
         <div className="relative order-3 w-full md:order-none md:ml-4 md:w-80">
           <Search size={16} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
@@ -175,7 +175,7 @@ export function CalendarApp() {
           <section aria-label="Сводка" className="grid gap-3 xl:grid-cols-[1fr_auto]">
             <div className="rounded-2xl bg-primary p-5 text-on-primary">
               <p className="text-sm opacity-90 first-letter:uppercase">{fmtLong(today)}</p>
-              <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">{greeting(hour)}{user?.name ? `, ${user.name}` : ""}</h1>
+              <h1 className="font-display text-4xl font-medium sm:text-5xl">{greeting(hour)}{user?.name ? `, ${user.name}` : ""}</h1>
               <p className="mt-2 text-sm opacity-95">
                 {!group ? "Выберите группу, чтобы увидеть расписание." : nextClass ? <>Следующая пара: <b className="num">{minToHm(nextClass.start!)}</b> — {nextClass.title}{nextClass.location && `, ${nextClass.location}`}</> : stat.classes ? "Пары на сегодня закончились." : "Сегодня пар нет."}
               </p>
@@ -183,7 +183,7 @@ export function CalendarApp() {
             <dl className="grid grid-cols-3 gap-3 text-center xl:w-[22rem]">
               {([["пар сегодня", stat.classes, "class"], ["дедлайнов", stat.deadlines, "deadline"], ["личных дел", stat.personal, "note"]] as const).map(([l, n, k]) => (
                 <div key={l} className="rounded-2xl border border-border bg-surface p-3">
-                  <dd className="num font-display text-4xl font-semibold leading-none">{n}</dd>
+                  <dd className="num font-display text-4xl font-medium leading-none">{n}</dd>
                   <dt className="mt-1.5 flex items-center justify-center gap-1.5 text-xs text-muted"><span aria-hidden className={cx("size-2 rounded-full", KIND_DOT[k])} />{l}</dt>
                 </div>
               ))}
@@ -210,7 +210,7 @@ export function CalendarApp() {
             <Button size="sm" onClick={() => { setDate(null); setSelected(null); }}>Сегодня</Button>
             <IconButton label="Назад" onClick={() => shift(-1)}><ChevronLeft size={20} aria-hidden /></IconButton>
             <IconButton label="Вперёд" onClick={() => shift(1)}><ChevronRight size={20} aria-hidden /></IconButton>
-            <h2 aria-live="polite" className="num font-display text-xl font-semibold first-letter:uppercase sm:text-2xl">{title}</h2>
+            <h2 aria-live="polite" className="num font-display text-2xl font-medium first-letter:uppercase sm:text-[28px]">{title}</h2>
             {loading && <span className="text-xs text-muted" role="status">Загрузка…</span>}
             <div role="tablist" aria-label="Вид календаря" className="ml-auto grid grid-cols-3 gap-1 rounded-xl bg-surface-2 p-1">
               {VIEWS.filter((v) => !(mobile && v.id === "week")).map((v) => (

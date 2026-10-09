@@ -95,7 +95,7 @@ export function Modal({
       {open && (
         <div className="p-5 sm:p-6">
           <div className="mb-4 flex items-start justify-between gap-3">
-            <h2 id={titleId} className="font-display text-2xl font-semibold leading-tight">
+            <h2 id={titleId} className="font-display text-[26px] font-medium">
               {title}
             </h2>
             <IconButton label="Закрыть" onClick={onClose} className="-mr-2 -mt-1">

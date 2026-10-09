@@ -14,7 +14,7 @@ export function ItemDetails({ item, onClose }: { item: Item | null; onClose: () 
         <div className="space-y-3 text-[0.95rem]">
           {item.cancelled && <p role="status" className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-medium text-danger">Пара отменена</p>}
           <p className="first-letter:uppercase">
-            {fmtLong(item.date)}, <span className="num font-semibold">{timeLabel(item)}</span>
+            {fmtLong(item.date)}, <span className="num font-medium">{timeLabel(item)}</span>
           </p>
           {item.elective && <p className="text-sm font-medium text-primary">Дисциплина по выбору</p>}
           {item.location && (

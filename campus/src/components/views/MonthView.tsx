@@ -70,7 +70,7 @@ export function MonthView({ date, today, items, selected, onSelect, onMove }: { 
                   d === selected && "bg-primary-soft",
                 )}
               >
-                <span className={cx("num grid size-7 place-items-center rounded-full text-sm font-semibold", d === today && "bg-primary text-on-primary")}>{Number(d.slice(8))}</span>
+                <span className={cx("num grid size-7 place-items-center rounded-full text-sm font-medium", d === today && "bg-primary text-on-primary")}>{Number(d.slice(8))}</span>
                 <span className="hidden w-full space-y-0.5 sm:block">
                   {list.slice(0, 2).map((i) => (
                     <span key={i.key} className="flex items-center gap-1 text-[0.7rem] leading-tight">

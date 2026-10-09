@@ -304,3 +304,31 @@ test("список дисциплин строится по всему семе�
   await page.getByRole("button", { name: "Мои дисциплины и подгруппы" }).click();
   await expect(page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("checkbox", { name: /Исследовательский семинар III/ })).not.toBeChecked();
 });
+
+test("шрифты: Playfair Display для заголовков, Inter для интерфейса, оба с кириллицей", async ({ page }) => {
+  await open(page);
+  await page.evaluate(() => document.fonts.ready);
+  const info = await page.evaluate(() => {
+    const fam = (sel: string) => getComputedStyle(document.querySelector(sel)!).fontFamily;
+    const loaded = [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replace(/"/g, ""));
+    return {
+      h1: fam("h1"),
+      body: fam("body"),
+      lineBody: getComputedStyle(document.body).lineHeight,
+      weightH1: getComputedStyle(document.querySelector("h1")!).fontWeight,
+      loaded,
+      // кириллица действительно отрисована этими шрифтами, а не запасными
+      playfair: document.fonts.check('500 24px "Playfair Display"', "Лекторий"),
+      inter: document.fonts.check('400 15px "Inter Variable"', "Расписание"),
+    };
+  });
+  expect(info.h1).toContain("Playfair Display");
+  expect(info.body).toContain("Inter");
+  expect(info.weightH1).toBe("500");
+  expect(info.loaded.some((f) => f.includes("Playfair Display"))).toBe(true);
+  expect(info.loaded.some((f) => f.includes("Inter"))).toBe(true);
+  expect(info.playfair).toBe(true);
+  expect(info.inter).toBe(true);
+  // 15px × 1.5 = 22.5px — межстрочный интервал основного текста 150%
+  expect(parseFloat(info.lineBody)).toBeCloseTo(22.5, 0);
+});

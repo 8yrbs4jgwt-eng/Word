@@ -34,7 +34,7 @@ export function ItemChip({ item, onOpen, compact, className, style }: { item: It
       )}
     >
       <span className="flex items-center gap-1">
-        {!compact && <span className="num font-semibold">{timeLabel(item)}</span>}
+        {!compact && <span className="num font-normal">{timeLabel(item)}</span>}
         {item.high && <Flag size={11} aria-hidden className="shrink-0" />}
         {item.repeats && <Repeat size={11} aria-hidden className="shrink-0" />}
         {item.done && <Check size={12} aria-hidden className="shrink-0" />}

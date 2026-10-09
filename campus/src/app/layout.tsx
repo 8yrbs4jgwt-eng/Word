@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { PwaRegister } from "@/components/PwaRegister";
+// Шрифты лежат в самом приложении (npm), а не грузятся с Google: быстрее, работают офлайн и в PWA.
+// Playfair Display — заголовки (Medium 500 и SemiBold 600), Inter — интерфейс (переменный, 100–900).
+import "@fontsource/playfair-display/latin-500.css";
+import "@fontsource/playfair-display/cyrillic-500.css";
+import "@fontsource/playfair-display/latin-600.css";
+import "@fontsource/playfair-display/cyrillic-600.css";
+import "@fontsource-variable/inter";
 import "./globals.css";
 
 export const metadata: Metadata = {

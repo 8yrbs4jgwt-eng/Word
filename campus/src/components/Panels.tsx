@@ -31,9 +31,9 @@ export function DeadlinesPanel({ entries, tz, today, nowMin, onOpen, onToggle }:
   const shown = all ? list : list.slice(0, 6);
   return (
     <section aria-labelledby="dl-h" className="rounded-2xl border border-border bg-surface p-4">
-      <div className="mb-3 flex items-baseline justify-between gap-2">
-        <h2 id="dl-h" className="font-display text-xl font-semibold">Ближайшие дедлайны</h2>
-        <span className="num text-sm text-muted" aria-label={`Всего ${list.length}, на этой неделе ${week}`}>{list.length} · на неделе {week}</span>
+      <div className="mb-3">
+        <h2 id="dl-h" className="font-display text-2xl font-medium">Ближайшие дедлайны</h2>
+        <span className="num mt-0.5 block text-sm text-muted" aria-label={`Всего ${list.length}, на этой неделе ${week}`}>{list.length} · на неделе {week}</span>
       </div>
       {shown.length === 0 ? (
         <p className="py-4 text-center text-sm text-muted">Открытых дедлайнов нет — отличная работа!</p>
@@ -76,7 +76,7 @@ export function DayPlan({ date, today, items, onOpen, onToggle, onAdd }: { date:
     <section aria-labelledby="dp-h" className="rounded-2xl border border-border bg-surface p-4">
       <div className="mb-3">
         <p className="eyebrow">{date === today ? "Сегодня" : "План на день"}</p>
-        <h2 id="dp-h" className="font-display text-xl font-semibold first-letter:uppercase">{fmtLong(date)}</h2>
+        <h2 id="dp-h" className="font-display text-2xl font-medium first-letter:uppercase">{fmtLong(date)}</h2>
       </div>
       {items.length === 0 ? (
         <div className="space-y-3 py-3 text-center">
@@ -89,7 +89,7 @@ export function DayPlan({ date, today, items, onOpen, onToggle, onAdd }: { date:
             <li key={i.key} className="flex items-start gap-2.5">
               {i.kind === "deadline" ? <CheckBox checked={i.done} onChange={() => onToggle(i)} label={`${i.done ? "Снять отметку" : "Отметить выполненным"}: ${i.title}`} /> : <span aria-hidden className={cx("mt-2.5 ml-2.5 mr-2 size-2 shrink-0 rounded-full", KIND_DOT[i.kind])} />}
               <div className="min-w-0 flex-1">
-                <ItemChip item={i} onOpen={onOpen} className="!px-2.5 !py-1.5 !text-sm" />
+                <ItemChip item={i} onOpen={onOpen} className="!px-2.5 !py-1.5 !text-[15px]" />
                 {i.teacher && <p className="mt-0.5 flex items-center gap-1 px-1 text-xs text-muted"><MapPin size={11} aria-hidden /> {i.teacher}</p>}
               </div>
             </li>

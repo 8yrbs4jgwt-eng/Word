@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Лекторий — дизайн-справочник</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap&subset=cyrillic" rel="stylesheet">
 <style>
 :root{--bg:#f4f7fc;
 --surface:#ffffff;
@@ -45,10 +46,10 @@
 --note-fg:#dac8ff;
 --note-bar:#a98aee;}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5;font-variant-numeric:lining-nums tabular-nums}
 .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
-h1,h2,h3{font-family:"Iowan Old Style","Palatino Linotype","Source Serif 4",Georgia,serif;letter-spacing:-.01em;margin:0}
-h1{font-size:40px} h2{font-size:26px;margin:44px 0 14px} h3{font-size:20px;margin:18px 0 8px}
+h1,h2,h3{font-family:"Playfair Display",Georgia,serif;letter-spacing:-.01em;margin:0}
+h1{font-size:40px;font-weight:500} h2{font-size:28px;font-weight:500;margin:44px 0 14px} h3{font-size:24px;font-weight:500;margin:18px 0 8px}
 .eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 button.t{font:inherit;font-weight:500;height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
@@ -67,9 +68,9 @@ button.t{font:inherit;font-weight:500;height:40px;padding:0 16px;border-radius:1
 .deadline{background:var(--deadline-bg);color:var(--deadline-fg);border-color:var(--deadline-bar)}
 .note{background:var(--note-bg);color:var(--note-fg);border-color:var(--note-bar)}
 .hero{background:var(--primary);color:var(--on-primary);border-radius:16px;padding:20px 22px}
-.hero h2{margin:4px 0 6px;font-size:34px}
+.hero h2{margin:4px 0 6px;font-size:40px}
 .stat{text-align:center;border:1px solid var(--border);border-radius:16px;padding:12px;background:var(--surface);min-width:110px}
-.stat b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:36px;display:block;line-height:1}
+.stat b{font-family:"Playfair Display",Georgia,serif;font-size:36px;font-weight:500;display:block;line-height:1}
 .stat span{font-size:12px;color:var(--muted)}
 input.f{height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 12px;font:inherit;width:260px}
 .icons{display:flex;gap:16px;align-items:center;flex-wrap:wrap} .icons img{border-radius:16px}
@@ -127,14 +128,15 @@ table{border-collapse:collapse;width:100%;font-size:14px} td,th{text-align:left;
 
 <h2>Шрифты</h2>
 <div class="two">
-<div class="card"><p class="eyebrow">Заголовки — serif</p>
-<div style="font-family:'Iowan Old Style','Palatino Linotype','Source Serif 4',Georgia,serif;letter-spacing:-.01em">
-<div style="font-size:36px;font-weight:600;line-height:1.1">Доброе утро, Алина</div><div style="font-size:24px;font-weight:600;margin-top:8px">5 – 11 октября</div><div style="font-size:20px;font-weight:600;margin-top:8px">Вторник, 6 октября</div></div>
-<p style="color:var(--muted);font-size:13px">В Figma: <b>Source Serif 4</b> (бесплатный, Google Fonts) или Georgia. Веса 600 и 700.</p></div>
-<div class="card"><p class="eyebrow">Интерфейс — sans</p>
+<div class="card"><p class="eyebrow">Заголовки — Playfair Display</p>
+<div style="font-family:'Playfair Display',Georgia,serif;letter-spacing:-.01em">
+<div style="font-size:48px;font-weight:500;line-height:1.1">Доброе утро, Алина</div><div style="font-size:28px;font-weight:500;margin-top:8px">5 – 11 октября</div><div style="font-size:24px;font-weight:500;margin-top:8px">Вторник, 6 октября</div></div>
+<p style="color:var(--muted);font-size:13px">Playfair Display Medium 500 (SemiBold 600 — для акцентов). Межстрочный 110–120%.</p></div>
+<div class="card"><p class="eyebrow">Интерфейс — Inter</p>
 <div style="font-size:16px">Основной текст 16/24 — расписание, записи, поля.</div><div style="font-size:14px;color:var(--muted);margin-top:6px">Малый текст 14/20 — подписи, подсказки.</div><div style="font-size:12px;color:var(--muted);margin-top:6px">Мелкий 12/16 — счётчики, время в сетке.</div><p class="eyebrow" style="margin-top:10px">Подпись капсом</p>
-<p style="color:var(--muted);font-size:13px">В Figma: <b>Inter</b>. Веса 400, 500, 600.</p></div></div>
+<p style="color:var(--muted);font-size:13px">Inter Regular 400 · Medium 500 · SemiBold 600. Межстрочный 145–150%.</p></div></div>
 
+<h3>Стили текста</h3><table><tr><th>Элемент</th><th>Шрифт и размер</th></tr><tr><td>Название «Лекторий»</td><td>Playfair Display Medium 500, 26–28px</td></tr><tr><td>Главный заголовок</td><td>Playfair Display Medium 500, 36px (телефон) / 48px (компьютер)</td></tr><tr><td>Заголовки окон и разделов</td><td>Playfair Display Medium 500, 24–28px</td></tr><tr><td>Названия занятий и записей</td><td>Inter Medium 500, 15–16px</td></tr><tr><td>Основной текст и поля</td><td>Inter Regular 400, 14–16px (базовый 15px, межстрочный 150%)</td></tr><tr><td>Кнопки и навигация</td><td>Inter Medium 500, 14–16px</td></tr><tr><td>Время и вспомогательные подписи</td><td>Inter Regular 400, 12–14px</td></tr><tr><td>Надпись над заголовком (eyebrow)</td><td>Inter SemiBold 600, 11.5px, ПРОПИСНЫЕ, трекинг 0.09em</td></tr><tr><td>Цифры</td><td>одинаковой ширины, «прописные» (lining + tabular)</td></tr></table>
 <h2>Компоненты</h2>
 <h3>Кнопки</h3><div class="row"><span class="btn primary">Добавить дедлайн</span><span class="btn soft">Сегодня</span><span class="btn danger">Удалить</span></div>
 <h3>Переключатели и фильтры</h3><div class="row"><span class="pill"><i class="dot" style="background:var(--class-bar)"></i>Пары</span><span class="pill"><i class="dot" style="background:var(--deadline-bar)"></i>Дедлайны</span><span class="pill"><i class="dot" style="background:var(--note-bar)"></i>Заметки</span></div>
@@ -147,7 +149,7 @@ table{border-collapse:collapse;width:100%;font-size:14px} td,th{text-align:left;
 <h3>Поле ввода (высота 44px, радиус 12px)</h3><input class="f" placeholder="Название">
 
 <h2>Иконка приложения</h2>
-<div class="icons"><img src="icons/icon-192.png" width="96" alt=""><img src="icons/icon-512.png" width="96" alt=""><img src="icons/icon-maskable-512.png" width="96" alt="" style="border-radius:0"><span style="color:var(--muted);font-size:14px">Квадрат 512×512, скругление 112px, фон #2350d8, буква «Л» Georgia Bold. Третий вариант — «maskable» для Android (без скругления).</span></div>
+<div class="icons"><img src="icons/icon-192.png" width="96" alt=""><img src="icons/icon-512.png" width="96" alt=""><img src="icons/icon-maskable-512.png" width="96" alt="" style="border-radius:0"><span style="color:var(--muted);font-size:14px">Квадрат 512×512, скругление 112px, фон #2350d8, буква «Л» Playfair Display Medium. Третий вариант — «maskable» для Android (без скругления).</span></div>
 <p style="color:var(--muted);font-size:14px">Значки в интерфейсе — библиотека <b>Lucide</b> (lucide.dev, в Figma есть плагин Lucide Icons), линия 2px, размер 16–20px.</p>
 
 <h2>Размеры и сетка</h2>

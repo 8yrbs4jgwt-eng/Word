@@ -5,7 +5,7 @@
   --bg: #f4f7fc;
   --surface: #ffffff;
   --surface-2: #eef2fa;
-  --text: #121c36;
+  --text: #131a2e; /* тёмно-чернильный */
   --muted: #55627d;
   --border: #d9e0ee;
   --primary: #2350d8;
@@ -32,7 +32,7 @@
     --bg: #0c1325;
     --surface: #131c33;
     --surface-2: #1a2540;
-    --text: #e7ecf8;
+    --text: #f1ede4; /* мягкий молочно-белый */
     --muted: #9eabc6;
     --border: #28375a;
     --primary: #86a8ff;
@@ -59,7 +59,7 @@
   --bg: #0c1325;
   --surface: #131c33;
   --surface-2: #1a2540;
-  --text: #e7ecf8;
+  --text: #f1ede4; /* мягкий молочно-белый */
   --muted: #9eabc6;
   --border: #28375a;
   --primary: #86a8ff;
@@ -103,8 +103,8 @@
   --color-note-bg: var(--note-bg);
   --color-note-fg: var(--note-fg);
   --color-note-bar: var(--note-bar);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Playfair Display", "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
 }
 
 html {
@@ -114,13 +114,21 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5; /* основной текст: 145–150% */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* цифры одинаковой ширины и «прописные», чтобы время и даты выстраивались ровно */
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* Заголовки: Playfair Display Medium, межстрочный 110–120% */
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1.15;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .num {
   font-variant-numeric: tabular-nums lining-nums;
