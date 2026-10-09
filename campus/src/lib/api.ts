@@ -2,7 +2,8 @@ import "server-only";
 import { UpstreamError } from "@/lib/spbu/client";
 
 export function json(data: unknown, init?: ResponseInit) {
-  return Response.json(data, { ...init, headers: { "cache-control": "no-store", ...init?.headers } });
+  // charset обязателен: без него Safari показывает кириллицу в JSON как «РЅР°РІ…»
+  return Response.json(data, { ...init, headers: { "cache-control": "no-store", "content-type": "application/json; charset=utf-8", ...init?.headers } });
 }
 
 export function bad(message: string, status = 400) {

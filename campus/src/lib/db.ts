@@ -127,11 +127,18 @@ export async function openDb(target: string): Promise<Db> {
 
 const g = globalThis as unknown as { __lektorijDb?: Promise<Db> };
 
+/** Описание значения без раскрытия секретов — только форма: длина и наличие характерных частей. */
+export function describeValue(v: string): string {
+  const t = v.trim();
+  const has = (s: string) => (t.includes(s) ? "да" : "нет");
+  return `В значении ${t.length} симв.; есть «://»: ${has("://")}, есть «@»: ${has("@")}, есть «neon.tech»: ${has("neon.tech")}.`;
+}
+
 /** Куда подключаться. Если DATABASE_URL задан, но это не ссылка на Postgres — явная ошибка, а не молчаливый SQLite-файл. */
 export function resolveTarget(env: Record<string, string | undefined> = process.env): string {
   if (env.DATABASE_URL?.trim()) {
     const url = extractPostgresUrl(env.DATABASE_URL);
-    if (!url) throw new Error("DATABASE_URL задан, но в нём нет ссылки вида postgresql://… — проверьте значение переменной");
+    if (!url) throw new Error(`DATABASE_URL задан, но это не ссылка на Postgres. ${describeValue(env.DATABASE_URL)} Значение должно начинаться с postgresql:// (двоеточие и два слэша).`);
     return url;
   }
   return env.DATABASE_PATH ?? path.join(process.cwd(), "data", "campus.db");
@@ -159,5 +166,5 @@ export function getDb(): Promise<Db> {
 export function describeDbError(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
   const code = (e as { code?: string })?.code;
-  return `${code ? `${code}: ` : ""}${msg}`.replace(/postgres(ql)?:\/\/\S+/gi, "[url]").slice(0, 200);
+  return `${code ? `${code}: ` : ""}${msg}`.replace(/postgres(?:ql)?:\/\/[^\s@]*@\S*/gi, "[url]").slice(0, 200);
 }

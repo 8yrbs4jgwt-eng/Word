@@ -45,3 +45,28 @@ describe("значение DATABASE_URL с лишним текстом", () => {
     expect(() => resolveTarget({ DATABASE_URL: "что-то не то" })).toThrow(/postgresql:\/\//);
   });
 });
+
+import { describeDbError, describeValue } from "@/lib/db";
+
+describe("диагностика без утечки секретов", () => {
+  it("описание значения не содержит самого значения", () => {
+    const d = describeValue("npg_SuperSecretPassword");
+    expect(d).not.toContain("SuperSecret");
+    expect(d).toContain("23 симв.");
+    expect(d).toContain("есть «://»: нет");
+  });
+  it("в сообщении об ошибке ссылка с паролем вырезается, а обычный текст остаётся", () => {
+    expect(describeDbError(new Error("fail postgresql://u:secret@host/db end"))).not.toContain("secret");
+    expect(describeDbError(new Error("значение должно начинаться с postgresql:// (двоеточие)"))).toContain("postgresql://");
+  });
+  it("ошибка про неверное значение понятна и не раскрывает пароль", () => {
+    let msg = "";
+    try {
+      resolveTarget({ DATABASE_URL: "npg_MkaSecret123" });
+    } catch (e) {
+      msg = describeDbError(e);
+    }
+    expect(msg).toContain("не ссылка на Postgres");
+    expect(msg).not.toContain("MkaSecret");
+  });
+});
