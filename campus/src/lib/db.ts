@@ -77,9 +77,20 @@ function sqliteDb(file: string): Db {
 // BIGINT (oid 20) приходит строкой — все наши значения (миллисекунды) безопасно помещаются в number
 pg.types.setTypeParser(20, (v) => Number(v));
 
+/**
+ * Строка из консоли Neon содержит channel_binding=require — драйвер pg и пулер соединений Neon
+ * с ним не дружат, а для безопасности достаточно sslmode=require. Убираем параметр, чтобы
+ * строку можно было вставлять как есть.
+ */
+export function normalizePostgresUrl(url: string): string {
+  const u = new URL(url.trim());
+  u.searchParams.delete("channel_binding");
+  return u.toString();
+}
+
 async function postgresDb(url: string): Promise<Db> {
   const pool = new pg.Pool({
-    connectionString: url,
+    connectionString: normalizePostgresUrl(url),
     max: 5,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 15_000, // бесплатная база «просыпается» несколько секунд
@@ -102,7 +113,7 @@ async function postgresDb(url: string): Promise<Db> {
 
 /** target: postgres://… | путь к файлу SQLite | ":memory:" */
 export async function openDb(target: string): Promise<Db> {
-  return /^postgres(ql)?:\/\//.test(target) ? postgresDb(target) : sqliteDb(target);
+  return /^\s*postgres(ql)?:\/\//.test(target) ? postgresDb(target) : sqliteDb(target);
 }
 
 const g = globalThis as unknown as { __lektorijDb?: Promise<Db> };
