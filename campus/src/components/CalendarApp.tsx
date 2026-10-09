@@ -15,6 +15,7 @@ import { applySelection, undecidedElectives, unresolvedSlots } from "@/lib/selec
 import { Banner, Button, IconButton, KIND_DOT, KIND_LABEL_PL, cx, inputCls } from "@/components/ui";
 import { useApp } from "@/components/store";
 import { useClasses } from "@/components/useClasses";
+import { useTerm } from "@/components/useTerm";
 import { AgendaView } from "@/components/views/AgendaView";
 import { MonthView } from "@/components/views/MonthView";
 import { WeekView } from "@/components/views/WeekView";
@@ -101,8 +102,10 @@ export function CalendarApp() {
 
   // выбор дисциплин и подгрупп применяется только к своей сохранённой группе
   const chosen = useMemo(() => applySelection(classes, settings.selection, group?.id ?? null), [classes, settings.selection, group?.id]);
-  const unresolved = useMemo(() => (group && isMine ? unresolvedSlots(classes, settings.selection, group.id) : []), [classes, settings.selection, group, isMine]);
-  const electivesLeft = useMemo(() => (group && isMine ? undecidedElectives(classes, settings.selection, group.id) : []), [classes, settings.selection, group, isMine]);
+  // «что ещё не выбрано» считаем по всему семестру, а не по видимой неделе
+  const term = useTerm(group && isMine ? group.id : null);
+  const unresolved = useMemo(() => (group && isMine ? unresolvedSlots(term.events, settings.selection, group.id) : []), [term.events, settings.selection, group, isMine]);
+  const electivesLeft = useMemo(() => (group && isMine ? undecidedElectives(term.events, settings.selection, group.id) : []), [term.events, settings.selection, group, isMine]);
 
   const all = useMemo(() => {
     const cls = classItems(chosen, tz).filter((i) => i.date >= from && i.date <= to);

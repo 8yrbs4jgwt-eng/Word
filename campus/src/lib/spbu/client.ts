@@ -64,6 +64,16 @@ export const getWeekEvents = async (groupId: number, weekMonday: string): Promis
     return normalizeEvents(await getJson(`/groups/${groupId}/events/${weekMonday}/${end}`), groupId);
   });
 
+/**
+ * Все занятия группы за период одним запросом (API принимает любой диапазон дат).
+ * Нужен, чтобы список дисциплин и подгрупп строился по всему семестру: редкие занятия
+ * (например, «Исследовательский семинар» раз в несколько недель) не должны пропадать.
+ */
+export const getTermEvents = async (groupId: number, from: string, to: string): Promise<Cached<ClassEvent[]>> =>
+  fetchCached(await db(), `term:${groupId}:${from}:${to}`, 6 * HOUR, async () =>
+    normalizeEvents(await getJson(`/groups/${groupId}/events/${from}/${to}`, 3, 45_000), groupId),
+  );
+
 function addDays(ymd: string, n: number): string {
   const d = new Date(`${ymd}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + n);

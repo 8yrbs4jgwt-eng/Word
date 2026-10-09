@@ -291,3 +291,16 @@ test("баннер «показана копия»: кнопка «Обнови�
   await banner.getByRole("button", { name: "Обновить" }).click();
   await expect(page.getByText("показана сохранённая копия")).toHaveCount(0);
 });
+
+test("список дисциплин строится по всему семестру: редкое занятие вне ближайших недель попадает в список", async ({ page }) => {
+  await open(page);
+  await pickGroup(page, { keepSelection: true });
+  const sel = page.getByRole("dialog", { name: "Мои дисциплины" });
+  // «Исследовательский семинар III» в тестовых данных бывает только через 6 недель — в ближайшие 4 недели его нет
+  const region = sel.getByRole("region", { name: "Дисциплины", exact: true });
+  await expect(region.getByRole("checkbox", { name: /Исследовательский семинар III/ })).toBeVisible();
+  await sel.getByRole("checkbox", { name: /Исследовательский семинар III/ }).uncheck();
+  await sel.getByRole("button", { name: "Сохранить" }).click();
+  await page.getByRole("button", { name: "Мои дисциплины и подгруппы" }).click();
+  await expect(page.getByRole("dialog", { name: "Мои дисциплины" }).getByRole("checkbox", { name: /Исследовательский семинар III/ })).not.toBeChecked();
+});

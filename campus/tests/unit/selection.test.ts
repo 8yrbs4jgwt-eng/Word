@@ -117,3 +117,37 @@ describe("реальные данные: ГМУ 23.Б09 (электив и фа�
     expect(displayName("Алгебра")).toBe("Алгебра");
   });
 });
+
+import { termWindow } from "@/lib/spbu/term";
+import type { ClassEvent } from "@/lib/spbu/types";
+
+describe("список дисциплин по всему семестру (ГМУ 23.Б09)", () => {
+  const term = JSON.parse(fs.readFileSync("tests/fixtures/term-gmu.json", "utf8")) as ClassEvent[];
+  const SEMINAR = "Исследовательский семинар III";
+
+  it("редкое занятие есть в семестре: 10 занятий, но не каждую неделю", () => {
+    const s = term.filter((e) => disciplineOf(e.title) === SEMINAR);
+    expect(s).toHaveLength(10);
+    expect(new Set(s.map((e) => e.date)).size).toBe(5); // 5 разных дней за семестр
+  });
+
+  it("в каталоге за семестр семинар есть, а в узком окне из 4 недель — нет (так было раньше)", () => {
+    expect(buildCatalog(term).disciplines.map((d) => d.name)).toContain(SEMINAR);
+    const narrow = term.filter((e) => e.date >= "2026-10-09" && e.date <= "2026-11-05");
+    expect(buildCatalog(narrow).disciplines.map((d) => d.name)).not.toContain(SEMINAR);
+  });
+
+  it("выбранный электив и обычные предметы работают на полных данных семестра", () => {
+    const sel: Selection = { groupId: 1, hidden: [SEMINAR], picks: {}, electives: ["Электив. Лидерство"] };
+    const r = applySelection(term, sel, 1);
+    expect(r.some((e) => disciplineOf(e.title) === SEMINAR)).toBe(false); // скрытый предмет пропал
+    expect(r.some((e) => e.title.startsWith("Политология"))).toBe(true);
+    expect(new Set(r.filter((e) => e.elective).map((e) => disciplineOf(e.title)))).toEqual(new Set(["Электив. Лидерство"]));
+  });
+
+  it("окно семестра: 8 недель назад и 12 вперёд, границы по неделям", () => {
+    expect(termWindow("2026-10-09")).toEqual({ from: "2026-08-10", to: "2027-01-03" });
+    expect(termWindow("2026-10-12")).toEqual({ from: "2026-08-17", to: "2027-01-10" }); // понедельник
+    expect(termWindow("2026-10-11")).toEqual({ from: "2026-08-10", to: "2027-01-03" }); // воскресенье
+  });
+});

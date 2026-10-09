@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { buildCatalog, disciplineOf, displayName, NONE, type Selection } from "@/lib/selection";
-import { addDays, todayIn } from "@/lib/time";
 import { Banner, Button, Modal, cx, inputCls } from "@/components/ui";
-import { useClasses } from "@/components/useClasses";
+import { useTerm } from "@/components/useTerm";
 
 const WD = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -17,9 +16,8 @@ export function SelectionDialog({ open, onClose, group, selection, onSave }: { o
 }
 
 function Body({ group, selection, onClose, onSave }: { group: { id: number; name: string }; selection: Selection | null; onClose: () => void; onSave: (s: Selection | null) => void }) {
-  const today = todayIn("Europe/Moscow");
-  // смотрим 4 недели вперёд, чтобы увидеть и редкие занятия
-  const { classes, loading, failed, retry } = useClasses(group.id, today, addDays(today, 27));
+  // весь семестр, а не ближайшие недели: редкие занятия (раз в месяц) тоже должны попасть в список
+  const { events: classes, loading, failed, retry } = useTerm(group.id);
   const catalog = useMemo(() => buildCatalog(classes), [classes]);
   const own = selection?.groupId === group.id ? selection : null;
   const [hidden, setHidden] = useState<string[]>(own?.hidden ?? []);
@@ -67,7 +65,7 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
                         <input type="checkbox" className="mt-1 size-5 accent-[var(--primary)]" checked={on} onChange={() => toggleElective(d.name)} />
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{displayName(d.name)}</span>
-                          <span className="block text-xs text-muted">{/^факультатив/i.test(d.name) ? "факультатив" : "электив"} · {d.kinds.join(", ") || "занятия"} · {d.count} за 4 недели</span>
+                          <span className="block text-xs text-muted">{/^факультатив/i.test(d.name) ? "факультатив" : "электив"} · {d.kinds.join(", ") || "занятия"} · {d.count} в семестре</span>
                         </span>
                       </label>
                     </li>
@@ -88,7 +86,7 @@ function Body({ group, selection, onClose, onSave }: { group: { id: number; name
                       <input type="checkbox" className="mt-1 size-5 accent-[var(--primary)]" checked={on} onChange={() => toggleDiscipline(d.name)} />
                       <span className="min-w-0 flex-1">
                         <span className={cx("block font-medium", !on && "line-through")}>{d.name}</span>
-                        <span className="block text-xs text-muted">{d.kinds.join(", ") || "занятия"} · {d.count} за 4 недели</span>
+                        <span className="block text-xs text-muted">{d.kinds.join(", ") || "занятия"} · {d.count} в семестре</span>
                       </span>
                     </label>
                   </li>

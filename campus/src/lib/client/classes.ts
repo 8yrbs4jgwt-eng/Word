@@ -42,3 +42,23 @@ export function pruneSavedWeeks(currentMonday: string) {
     }
   } catch {}
 }
+
+export type TermResult = { events: ClassEvent[]; updatedAt: string | null; stale: boolean; failed: boolean; error?: string };
+
+const termKey = (g: number) => `campus:term:${g}`;
+
+/** Занятия группы за семестр. Копия лежит в localStorage — список работает и без сети. */
+export async function loadTerm(groupId: number): Promise<TermResult> {
+  try {
+    const res = await fetch(`/api/timetable/term?group=${groupId}`);
+    if (!res.ok) throw new ServerError(res.status);
+    const body = (await res.json()) as Cached<ClassEvent[]>;
+    if (!body.stale) lsSet(termKey(groupId), { events: body.data, updatedAt: body.updatedAt });
+    return { events: body.data, updatedAt: body.updatedAt, stale: body.stale, failed: false, error: body.error };
+  } catch (e) {
+    const error = e instanceof ServerError ? `сервер сайта ответил ошибкой ${e.status}` : "нет связи с сервером";
+    const saved = lsGet<{ events: ClassEvent[]; updatedAt: string } | null>(termKey(groupId), null);
+    if (saved) return { events: saved.events, updatedAt: saved.updatedAt, stale: true, failed: false, error };
+    return { events: [], updatedAt: null, stale: false, failed: true, error };
+  }
+}

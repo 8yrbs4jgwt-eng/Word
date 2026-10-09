@@ -14,19 +14,38 @@ const shiftIso = (iso, delta) => {
   return new Date(d.getTime() + delta * day).toISOString().slice(0, 10) + iso.slice(10);
 };
 
-function events(from) {
-  const delta = Math.round((Date.parse(`${from}T00:00:00Z`) - Date.parse(`${FIXTURE_MONDAY}T00:00:00Z`)) / day);
-  const raw = fx("events-week");
-  for (const d of raw.Days) {
-    d.Day = shiftIso(d.Day, delta);
-    for (const e of d.DayStudyEvents) {
-      e.Start = shiftIso(e.Start, delta);
-      e.End = shiftIso(e.End, delta);
-      // как в реальных данных (например, ГМУ): электив отмечен префиксом в названии, IsElective = false
-      if (e.Subject.startsWith("Информатика")) e.Subject = `Электив. ${e.Subject}`;
+const ymd = (ms) => new Date(ms).toISOString().slice(0, 10);
+const mondayMs = (d) => { const t = Date.parse(`${d}T00:00:00Z`); return t - ((new Date(t).getUTCDay() + 6) % 7) * day; };
+
+/** Занятия за любой диапазон: фикстурная неделя повторяется по неделям. API СПбГУ тоже принимает любой диапазон. */
+function events(from, to) {
+  const days = [];
+  const fixtureMon = Date.parse(`${FIXTURE_MONDAY}T00:00:00Z`);
+  const thisMon = mondayMs(ymd(Date.now()));
+  for (let mon = mondayMs(from); mon <= Date.parse(`${to}T00:00:00Z`); mon += 7 * day) {
+    const delta = Math.round((mon - fixtureMon) / day);
+    const raw = fx("events-week");
+    for (const d of raw.Days) {
+      d.Day = shiftIso(d.Day, delta);
+      for (const e of d.DayStudyEvents) {
+        e.Start = shiftIso(e.Start, delta);
+        e.End = shiftIso(e.End, delta);
+        // как в реальных данных (например, ГМУ): электив отмечен префиксом в названии, IsElective = false
+        if (e.Subject.startsWith("Информатика")) e.Subject = `Электив. ${e.Subject}`;
+      }
+      days.push(d);
+    }
+    // редкое занятие: раз в несколько недель (через 6 недель от текущей) — как «Исследовательский семинар» у ГМУ
+    if (mon === thisMon + 6 * 7 * day) {
+      const proto = JSON.parse(JSON.stringify(raw.Days[0].DayStudyEvents[0]));
+      proto.Subject = "Исследовательский семинар III, семинар";
+      proto.Start = `${ymd(mon + 1 * day)}T10:00:00`;
+      proto.End = `${ymd(mon + 1 * day)}T11:35:00`;
+      days.push({ Day: `${ymd(mon + 1 * day)}T00:00:00`, DayString: "", DayStudyEvents: [proto] });
     }
   }
-  return raw;
+  const inRange = days.filter((d) => d.Day.slice(0, 10) >= from && d.Day.slice(0, 10) <= to);
+  return { StudentGroupId: 0, Days: inRange };
 }
 
 const state = { fail: false };
@@ -46,7 +65,7 @@ const server = http.createServer((req, res) => {
   if (p === "/study/divisions") return send(200, fx("divisions"));
   if ((m = /^\/study\/divisions\/([^/]+)\/programs\/levels$/.exec(p))) return send(200, fx("levels"));
   if ((m = /^\/programs\/(\d+)\/groups$/.exec(p))) return send(200, fx("groups"));
-  if ((m = /^\/groups\/(\d+)\/events\/(\d{4}-\d{2}-\d{2})\/(\d{4}-\d{2}-\d{2})$/.exec(p))) return send(200, events(m[2]));
+  if ((m = /^\/groups\/(\d+)\/events\/(\d{4}-\d{2}-\d{2})\/(\d{4}-\d{2}-\d{2})$/.exec(p))) return send(200, events(m[2], m[3]));
   send(404, { error: "not found" });
 });
 server.listen(Number(process.argv[2] ?? 4010), () => console.log("fake spbu on", server.address().port));
