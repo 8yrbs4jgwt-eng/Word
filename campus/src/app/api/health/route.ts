@@ -8,6 +8,6 @@ export async function GET() {
     await db.get("SELECT 1 AS ok");
     return json({ ok: true, db: db.kind });
   } catch (e) {
-    return json({ ok: false, db: process.env.DATABASE_URL ? "postgres" : "sqlite", error: describeDbError(e) }, { status: 503 });
+    return json({ ok: false, db: process.env.DATABASE_URL?.trim() ? "postgres" : "sqlite", error: describeDbError(e) }, { status: 503 });
   }
 }

@@ -82,8 +82,17 @@ pg.types.setTypeParser(20, (v) => Number(v));
  * с ним не дружат, а для безопасности достаточно sslmode=require. Убираем параметр, чтобы
  * строку можно было вставлять как есть.
  */
+/**
+ * Достаёт ссылку postgres://… из значения переменной. Neon в консоли предлагает копировать
+ * команду вида `psql 'postgresql://…'`, а в настройки хостинга иногда попадают кавычки или
+ * `DATABASE_URL=` — всё лишнее отбрасываем.
+ */
+export function extractPostgresUrl(value: string): string | null {
+  return /postgres(?:ql)?:\/\/[^\s'"`]+/i.exec(value)?.[0] ?? null;
+}
+
 export function normalizePostgresUrl(url: string): string {
-  const u = new URL(url.trim());
+  const u = new URL((extractPostgresUrl(url) ?? url).trim());
   u.searchParams.delete("channel_binding");
   return u.toString();
 }
@@ -118,9 +127,25 @@ export async function openDb(target: string): Promise<Db> {
 
 const g = globalThis as unknown as { __lektorijDb?: Promise<Db> };
 
+/** Куда подключаться. Если DATABASE_URL задан, но это не ссылка на Postgres — явная ошибка, а не молчаливый SQLite-файл. */
+export function resolveTarget(env: Record<string, string | undefined> = process.env): string {
+  if (env.DATABASE_URL?.trim()) {
+    const url = extractPostgresUrl(env.DATABASE_URL);
+    if (!url) throw new Error("DATABASE_URL задан, но в нём нет ссылки вида postgresql://… — проверьте значение переменной");
+    return url;
+  }
+  return env.DATABASE_PATH ?? path.join(process.cwd(), "data", "campus.db");
+}
+
 export function getDb(): Promise<Db> {
   if (!g.__lektorijDb) {
-    const p = openDb(process.env.DATABASE_URL ?? process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "campus.db"));
+    let target: string;
+    try {
+      target = resolveTarget();
+    } catch (e) {
+      return Promise.reject(e); // не кэшируем: после исправления переменной заработает без перезапуска кода
+    }
+    const p = openDb(target);
     // неудачное подключение не запоминаем: следующий запрос попробует снова (база могла просто просыпаться)
     p.catch(() => {
       if (g.__lektorijDb === p) g.__lektorijDb = undefined;

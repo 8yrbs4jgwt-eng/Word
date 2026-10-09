@@ -17,3 +17,31 @@ describe("строка подключения к Postgres", () => {
     expect(normalizePostgresUrl("postgres://u:p@localhost:5432/db")).toBe("postgres://u:p@localhost:5432/db");
   });
 });
+
+import { extractPostgresUrl, resolveTarget } from "@/lib/db";
+
+describe("значение DATABASE_URL с лишним текстом", () => {
+  const url = "postgresql://neondb_owner:pw@ep-x-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+  it("команда psql из окна Neon", () => {
+    expect(extractPostgresUrl(`psql '${url}'`)).toBe(url);
+    expect(extractPostgresUrl(`psql "${url}"`)).toBe(url);
+  });
+  it("кавычки, имя переменной и пробелы", () => {
+    expect(extractPostgresUrl(`"${url}"`)).toBe(url);
+    expect(extractPostgresUrl(`DATABASE_URL=${url}`)).toBe(url);
+    expect(extractPostgresUrl(`  ${url}\n`)).toBe(url);
+  });
+  it("не ссылка — null", () => {
+    expect(extractPostgresUrl("/data/campus.db")).toBeNull();
+    expect(extractPostgresUrl("")).toBeNull();
+  });
+  it("нормализация тоже вынимает ссылку и убирает channel_binding", () => {
+    expect(normalizePostgresUrl(`psql '${url}'`)).toBe("postgresql://neondb_owner:pw@ep-x-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require");
+  });
+  it("выбор подключения: Postgres из переменной, иначе SQLite; мусор в DATABASE_URL — понятная ошибка", () => {
+    expect(resolveTarget({ DATABASE_URL: `psql '${url}'` })).toBe(url);
+    expect(resolveTarget({ DATABASE_PATH: "/tmp/x.db" })).toBe("/tmp/x.db");
+    expect(resolveTarget({ DATABASE_URL: "   ", DATABASE_PATH: "/tmp/y.db" })).toBe("/tmp/y.db");
+    expect(() => resolveTarget({ DATABASE_URL: "что-то не то" })).toThrow(/postgresql:\/\//);
+  });
+});
