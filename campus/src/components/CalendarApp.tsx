@@ -8,6 +8,7 @@ import { AuthDialog } from "@/components/AuthDialog";
 import { EntryDialog } from "@/components/EntryDialog";
 import { GroupDialog } from "@/components/GroupDialog";
 import { ItemDetails } from "@/components/ItemDetails";
+import { Logo } from "@/components/Logo";
 import { DayPlan, DeadlinesPanel } from "@/components/Panels";
 import { SelectionDialog } from "@/components/SelectionDialog";
 import { SettingsDialog } from "@/components/SettingsDialog";
@@ -150,10 +151,7 @@ export function CalendarApp() {
     <div className="mx-auto flex min-h-dvh max-w-[1400px] flex-col px-3 pb-24 sm:px-5 lg:px-8">
       <a href="#main" className="sr-only-focusable rounded-lg bg-primary px-3 py-2 text-on-primary">К содержимому</a>
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2 py-4">
-        <div className="flex items-center gap-2.5">
-          <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-primary text-on-primary font-display text-2xl font-medium">Л</span>
-          <span className="font-display text-[26px] font-medium sm:text-[28px]">Лекторий</span>
-        </div>
+        <Logo />
         <div className="relative order-3 w-full md:order-none md:ml-4 md:w-80">
           <Search size={16} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input type="search" aria-label="Поиск по предметам, названиям и аудиториям" placeholder="Поиск" className={cx(inputCls, "pl-9")} value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value })} />

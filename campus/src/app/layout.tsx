@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: "Личный учебный календарь студента СПбГУ: пары, дедлайны, заметки и напоминания.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Лекторий", statusBarStyle: "default" },
-  icons: { icon: "/icon.svg", apple: "/icon-192.png" },
+  icons: { icon: "/icon.svg", apple: "/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {

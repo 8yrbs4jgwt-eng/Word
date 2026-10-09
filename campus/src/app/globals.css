@@ -165,6 +165,30 @@ dialog::backdrop {
   }
 }
 
+/* Логотип: пропорции знака 423×316, надписи 1543×364 (как в исходном файле). --s — общий масштаб */
+.logo {
+  --s: 0.082;
+  gap: calc(40px * var(--s));
+}
+@media (min-width: 640px) {
+  .logo {
+    --s: 0.1;
+  }
+}
+.logo-mark {
+  display: block;
+  width: calc(423px * var(--s));
+  height: calc(316px * var(--s));
+}
+.logo-word {
+  display: block;
+  width: calc(1543px * var(--s));
+  height: calc(364px * var(--s));
+  background-color: var(--text);
+  -webkit-mask: url("/logo-wordmark.svg") center / contain no-repeat;
+  mask: url("/logo-wordmark.svg") center / contain no-repeat;
+}
+
 .sr-only-focusable:not(:focus) {
   position: absolute;
   width: 1px;

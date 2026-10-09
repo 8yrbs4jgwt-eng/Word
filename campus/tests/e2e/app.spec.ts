@@ -332,3 +332,32 @@ test("шрифты: Playfair Display для заголовков, Inter для �
   // 15px × 1.5 = 22.5px — межстрочный интервал основного текста 150%
   expect(parseFloat(info.lineBody)).toBeCloseTo(22.5, 0);
 });
+
+test("логотип: знак и надпись загружаются, надпись меняет цвет вместе с темой", async ({ page, request }) => {
+  await open(page);
+  const logo = page.getByRole("img", { name: "Лекторий" });
+  await expect(logo).toBeVisible();
+  // знак — картинка, которая реально загрузилась
+  const loaded = await logo.locator("img.logo-mark").evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0);
+  expect(loaded).toBe(true);
+  // файлы логотипа и иконок отдаются
+  for (const f of ["/logo-mark.svg", "/logo-wordmark.svg", "/logo.svg", "/icon.svg", "/icon-192.png", "/icon-512.png", "/icon-maskable-512.png", "/apple-touch-icon.png"]) {
+    expect((await request.get(f)).status(), f).toBe(200);
+  }
+  const color = () => page.locator(".logo-word").evaluate((el) => getComputedStyle(el).backgroundColor);
+  const mask = await page.locator(".logo-word").evaluate((el) => getComputedStyle(el).maskImage || getComputedStyle(el).webkitMaskImage);
+  expect(mask).toContain("logo-wordmark.svg");
+  expect(await color()).toBe("rgb(19, 26, 46)"); // тёмно-чернильный на светлой теме
+  await page.getByRole("button", { name: "Настройки" }).click();
+  await page.getByRole("button", { name: "Тёмная" }).click();
+  await page.keyboard.press("Escape");
+  expect(await color()).toBe("rgb(241, 237, 228)"); // молочно-белый на тёмной
+  // пропорции знака и надписи сохранены (423×316 и 1543×364)
+  const sizes = await page.evaluate(() => {
+    const m = document.querySelector(".logo-mark")!.getBoundingClientRect();
+    const w = document.querySelector(".logo-word")!.getBoundingClientRect();
+    return { m: m.width / m.height, w: w.width / w.height };
+  });
+  expect(sizes.m).toBeCloseTo(423 / 316, 1);
+  expect(sizes.w).toBeCloseTo(1543 / 364, 1);
+});
