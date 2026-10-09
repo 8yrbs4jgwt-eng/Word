@@ -9,7 +9,7 @@ const body = z.object({
   name: z.string().trim().max(80).default(""),
 });
 
-export async function POST(req: Request) {
+async function handle(req: Request) {
   const ip = req.headers.get("x-forwarded-for") ?? "local";
   if (rateLimited(`reg:${ip}`, 10, 3600_000)) return bad("Слишком много попыток. Попробуйте позже.", 429);
   const parsed = body.safeParse(await req.json().catch(() => null));
@@ -20,4 +20,13 @@ export async function POST(req: Request) {
   const s = await startSession(db, user.id);
   await setSessionCookie(s.token, s.expires);
   return json({ user: { id: user.id, email: user.email, name: user.name }, settings: user.settings, feedToken: user.feedToken });
+}
+
+export async function POST(req: Request) {
+  try {
+    return await handle(req);
+  } catch (e) {
+    console.error("[auth] register failed:", e instanceof Error ? e.message : e);
+    return bad("База данных временно недоступна. Попробуйте через минуту.", 503);
+  }
 }

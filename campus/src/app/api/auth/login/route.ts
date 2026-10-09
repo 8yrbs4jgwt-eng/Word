@@ -5,7 +5,7 @@ import { getDb } from "@/lib/db";
 
 const body = z.object({ email: z.string().trim().toLowerCase().max(200), password: z.string().max(200) });
 
-export async function POST(req: Request) {
+async function handle(req: Request) {
   const parsed = body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return bad("Введите email и пароль");
   const ip = req.headers.get("x-forwarded-for") ?? "local";
@@ -16,4 +16,13 @@ export async function POST(req: Request) {
   const s = await startSession(db, user.id);
   await setSessionCookie(s.token, s.expires);
   return json({ user: { id: user.id, email: user.email, name: user.name }, settings: user.settings, feedToken: user.feedToken });
+}
+
+export async function POST(req: Request) {
+  try {
+    return await handle(req);
+  } catch (e) {
+    console.error("[auth] login failed:", e instanceof Error ? e.message : e);
+    return bad("База данных временно недоступна. Попробуйте через минуту.", 503);
+  }
 }

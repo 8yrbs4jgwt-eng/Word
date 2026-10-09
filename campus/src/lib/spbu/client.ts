@@ -1,5 +1,5 @@
 import "server-only";
-import { getDb } from "@/lib/db";
+import { describeDbError, getDb, type Db } from "@/lib/db";
 import { fetchCached } from "./cache";
 import { normalizeDivisions, normalizeEvents, normalizeGroups, normalizeLevels } from "./normalize";
 import type { Cached, ClassEvent, Division, Group, ProgramLevel } from "./types";
@@ -12,6 +12,13 @@ export class UpstreamError extends Error {
     super(message);
   }
 }
+
+/** БД недоступна — работаем без кэша, но не молчим в логах. */
+const db = (): Promise<Db | null> =>
+  getDb().catch((e) => {
+    console.error("[db] недоступна, расписание грузится без кэша:", describeDbError(e));
+    return null;
+  });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -38,21 +45,21 @@ export async function getJson(path: string, attempts = 3, timeoutMs = 10_000): P
 }
 
 export const getDivisions = async (): Promise<Cached<Division[]>> =>
-  fetchCached(await getDb(), "divisions", 24 * HOUR, async () => normalizeDivisions(await getJson("/study/divisions")));
+  fetchCached(await db(), "divisions", 24 * HOUR, async () => normalizeDivisions(await getJson("/study/divisions")));
 
 export const getPrograms = async (alias: string): Promise<Cached<ProgramLevel[]>> =>
-  fetchCached(await getDb(), `programs:${alias}`, 24 * HOUR, async () =>
+  fetchCached(await db(), `programs:${alias}`, 24 * HOUR, async () =>
     normalizeLevels(await getJson(`/study/divisions/${alias}/programs/levels`)),
   );
 
 export const getGroups = async (programId: number): Promise<Cached<Group[]>> =>
-  fetchCached(await getDb(), `groups:${programId}`, 24 * HOUR, async () =>
+  fetchCached(await db(), `groups:${programId}`, 24 * HOUR, async () =>
     normalizeGroups(await getJson(`/programs/${programId}/groups`)),
   );
 
 /** weekMonday — YYYY-MM-DD понедельника (по Москве). */
 export const getWeekEvents = async (groupId: number, weekMonday: string): Promise<Cached<ClassEvent[]>> =>
-  fetchCached(await getDb(), `events:${groupId}:${weekMonday}`, 15 * 60_000, async () => {
+  fetchCached(await db(), `events:${groupId}:${weekMonday}`, 15 * 60_000, async () => {
     const end = addDays(weekMonday, 6);
     return normalizeEvents(await getJson(`/groups/${groupId}/events/${weekMonday}/${end}`), groupId);
   });

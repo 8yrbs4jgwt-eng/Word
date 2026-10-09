@@ -115,3 +115,45 @@ describe.each(backends)("причина сбоя при устаревшей к�
     await db.close();
   });
 });
+
+describe("устойчивость к недоступной базе", () => {
+  it("расписание грузится напрямую, если база не отвечает", async () => {
+    const broken = {
+      kind: "sqlite" as const,
+      get: () => Promise.reject(new Error("connection refused")),
+      all: () => Promise.reject(new Error("connection refused")),
+      run: () => Promise.reject(new Error("connection refused")),
+      close: async () => {},
+    };
+    const r = await fetchCached(broken, "k", 1000, async () => ["свежие данные"]);
+    expect(r).toMatchObject({ data: ["свежие данные"], stale: false });
+  });
+
+  it("совсем без базы (null) — тоже работает", async () => {
+    expect((await fetchCached(null, "k2", 1000, async () => 42)).data).toBe(42);
+  });
+
+  it("неудачное подключение не запоминается: следующий запрос пробует снова", async () => {
+    vi.resetModules();
+    const saved = { url: process.env.DATABASE_URL, path: process.env.DATABASE_PATH };
+    try {
+      process.env.DATABASE_URL = "postgres://u:p@127.0.0.1:1/db"; // порт закрыт — подключение сразу упадёт
+      const { getDb, describeDbError } = await import("@/lib/db");
+      const err = await getDb().then(() => null, (e) => e);
+      expect(err).toBeTruthy();
+      expect(describeDbError(new Error("fail postgres://user:secret@host/db?x=1 end"))).not.toContain("secret");
+
+      delete process.env.DATABASE_URL;
+      process.env.DATABASE_PATH = ":memory:";
+      const db = await getDb(); // тот же модуль и тот же getDb — но теперь подключение удаётся
+      expect(db.kind).toBe("sqlite");
+      await db.close();
+    } finally {
+      if (saved.url === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = saved.url;
+      if (saved.path === undefined) delete process.env.DATABASE_PATH;
+      else process.env.DATABASE_PATH = saved.path;
+      (globalThis as { __lektorijDb?: unknown }).__lektorijDb = undefined;
+    }
+  });
+});

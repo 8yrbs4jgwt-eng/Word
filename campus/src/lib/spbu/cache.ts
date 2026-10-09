@@ -21,19 +21,20 @@ export function describeError(err: unknown): string {
  * Если кэша нет совсем — пробрасывает ошибку.
  */
 export async function fetchCached<T>(
-  db: Db,
+  db: Db | null,
   key: string,
   ttlMs: number,
   load: () => Promise<T>,
   now: () => number = Date.now,
 ): Promise<Cached<T>> {
-  const row = await db.get<Row>("SELECT value, fetched_at FROM cache WHERE key = ?", key);
+  // база — только ускорение и запасной вариант: если она недоступна, расписание всё равно грузим напрямую
+  const row = db ? await db.get<Row>("SELECT value, fetched_at FROM cache WHERE key = ?", key).catch(() => undefined) : undefined;
 
   if (row && now() - row.fetched_at < ttlMs) {
     return { data: JSON.parse(row.value) as T, updatedAt: new Date(row.fetched_at).toISOString(), stale: false };
   }
 
-  const flight = `${db.kind}:${key}`;
+  const flight = `${db?.kind ?? "none"}:${key}`;
   let p = inflight.get(flight) as Promise<T> | undefined;
   if (!p) {
     p = load().finally(() => inflight.delete(flight));
@@ -45,7 +46,7 @@ export async function fetchCached<T>(
     const at = now();
     // сбой записи кэша не должен ломать ответ: данные уже получены
     await db
-      .run(
+      ?.run(
         "INSERT INTO cache(key, value, fetched_at) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, fetched_at=excluded.fetched_at",
         key,
         JSON.stringify(data),

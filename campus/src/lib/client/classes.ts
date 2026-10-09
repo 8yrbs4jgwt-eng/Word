@@ -3,6 +3,12 @@ import { lsGet, lsSet } from "./storage";
 
 export type WeekResult = { events: ClassEvent[]; updatedAt: string | null; stale: boolean; failed: boolean; error?: string };
 
+class ServerError extends Error {
+  constructor(readonly status: number) {
+    super(String(status));
+  }
+}
+
 const key = (g: number, w: string) => `campus:classes:${g}:${w}`;
 
 /**
@@ -12,13 +18,15 @@ const key = (g: number, w: string) => `campus:classes:${g}:${w}`;
 export async function loadWeek(groupId: number, weekMonday: string): Promise<WeekResult> {
   try {
     const res = await fetch(`/api/timetable/events?group=${groupId}&week=${weekMonday}`);
-    if (!res.ok) throw new Error(String(res.status));
+    if (!res.ok) throw new ServerError(res.status);
     const body = (await res.json()) as Cached<ClassEvent[]>;
     if (!body.stale) lsSet(key(groupId, weekMonday), { events: body.data, updatedAt: body.updatedAt });
     return { events: body.data, updatedAt: body.updatedAt, stale: body.stale, failed: false, error: body.error };
-  } catch {
+  } catch (e) {
+    // сервер ответил ошибкой — это не то же самое, что «нет интернета»
+    const error = e instanceof ServerError ? `сервер сайта ответил ошибкой ${e.status}` : "нет связи с сервером";
     const saved = lsGet<{ events: ClassEvent[]; updatedAt: string } | null>(key(groupId, weekMonday), null);
-    if (saved) return { events: saved.events, updatedAt: saved.updatedAt, stale: true, failed: false, error: "нет связи с сервером" };
+    if (saved) return { events: saved.events, updatedAt: saved.updatedAt, stale: true, failed: false, error };
     return { events: [], updatedAt: null, stale: false, failed: true };
   }
 }

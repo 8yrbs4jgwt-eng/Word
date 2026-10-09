@@ -119,6 +119,20 @@ export async function openDb(target: string): Promise<Db> {
 const g = globalThis as unknown as { __lektorijDb?: Promise<Db> };
 
 export function getDb(): Promise<Db> {
-  g.__lektorijDb ??= openDb(process.env.DATABASE_URL ?? process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "campus.db"));
+  if (!g.__lektorijDb) {
+    const p = openDb(process.env.DATABASE_URL ?? process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "campus.db"));
+    // неудачное подключение не запоминаем: следующий запрос попробует снова (база могла просто просыпаться)
+    p.catch(() => {
+      if (g.__lektorijDb === p) g.__lektorijDb = undefined;
+    });
+    g.__lektorijDb = p;
+  }
   return g.__lektorijDb;
+}
+
+/** Короткое безопасное описание ошибки БД (без адресов и паролей) — для /api/health и логов. */
+export function describeDbError(e: unknown): string {
+  const msg = e instanceof Error ? e.message : String(e);
+  const code = (e as { code?: string })?.code;
+  return `${code ? `${code}: ` : ""}${msg}`.replace(/postgres(ql)?:\/\/\S+/gi, "[url]").slice(0, 200);
 }
