@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Лекторий — дизайн-справочник</title>
+<style>
+:root{--bg:#f4f7fc;
+--surface:#ffffff;
+--surface-2:#eef2fa;
+--text:#121c36;
+--muted:#55627d;
+--border:#d9e0ee;
+--primary:#2350d8;
+--on-primary:#ffffff;
+--primary-soft:#e4ecff;
+--danger:#b3261e;
+--danger-soft:#fdeceb;
+--ok:#17703f;
+--class-bg:#e4ecff;
+--class-fg:#1a3a9c;
+--class-bar:#2f62ea;
+--deadline-bg:#fff0d9;
+--deadline-fg:#7a4708;
+--deadline-bar:#c46f0a;
+--note-bg:#f0e9fd;
+--note-fg:#58389a;
+--note-bar:#8a62d6;}
+:root[data-theme="dark"]{--bg:#0c1325;
+--surface:#131c33;
+--surface-2:#1a2540;
+--text:#e7ecf8;
+--muted:#9eabc6;
+--border:#28375a;
+--primary:#86a8ff;
+--on-primary:#0a1430;
+--primary-soft:#1c2c57;
+--danger:#ff9b92;
+--danger-soft:#3b1c1f;
+--ok:#6fd69a;
+--class-bg:#1b2c5a;
+--class-fg:#bdd0ff;
+--class-bar:#6f97ff;
+--deadline-bg:#3b2a0f;
+--deadline-fg:#ffd69c;
+--deadline-bar:#f0a548;
+--note-bg:#2d2252;
+--note-fg:#dac8ff;
+--note-bar:#a98aee;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+h1,h2,h3{font-family:"Iowan Old Style","Palatino Linotype","Source Serif 4",Georgia,serif;letter-spacing:-.01em;margin:0}
+h1{font-size:40px} h2{font-size:26px;margin:44px 0 14px} h3{font-size:20px;margin:18px 0 8px}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+button.t{font:inherit;font-weight:500;height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.sw{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+.sw .chip{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);flex:none}
+.sw b{display:block;font-size:14px} .sw small{display:block;color:var(--muted);font-size:12px} .sw code{font-size:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:12px;font-weight:500;border:0;font:inherit;font-weight:500}
+.primary{background:var(--primary);color:var(--on-primary)} .soft{background:var(--surface-2);color:var(--text)} .danger{background:var(--danger-soft);color:var(--danger)}
+.pill{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:9999px;background:var(--surface-2);font-size:14px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.ev{border-left:3px solid;border-radius:8px;padding:6px 10px;font-size:13px;max-width:300px}
+.class{background:var(--class-bg);color:var(--class-fg);border-color:var(--class-bar)}
+.deadline{background:var(--deadline-bg);color:var(--deadline-fg);border-color:var(--deadline-bar)}
+.note{background:var(--note-bg);color:var(--note-fg);border-color:var(--note-bar)}
+.hero{background:var(--primary);color:var(--on-primary);border-radius:16px;padding:20px 22px}
+.hero h2{margin:4px 0 6px;font-size:34px}
+.stat{text-align:center;border:1px solid var(--border);border-radius:16px;padding:12px;background:var(--surface);min-width:110px}
+.stat b{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:36px;display:block;line-height:1}
+.stat span{font-size:12px;color:var(--muted)}
+input.f{height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 12px;font:inherit;width:260px}
+.icons{display:flex;gap:16px;align-items:center;flex-wrap:wrap} .icons img{border-radius:16px}
+table{border-collapse:collapse;width:100%;font-size:14px} td,th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px} @media(max-width:760px){.two{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<div class="top"><div><p class="eyebrow">Дизайн-справочник</p><h1>Лекторий</h1></div>
+<button class="t" id="toggle" onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark';this.textContent=d?'Тёмная тема':'Светлая тема'">Тёмная тема</button></div>
+<p style="color:var(--muted);max-width:640px">Цвета, шрифты и компоненты сайта. Переключатель сверху показывает обе темы. Все значения лежат в <code>tokens.json</code> и <code>colors.css</code> — их можно импортировать в Figma (плагин Tokens Studio) или менять по списку.</p>
+
+<h2>Палитра</h2>
+<h3>Светлая тема</h3><div class="grid" id="light"><div class="sw"><span class="chip" style="background:var(--bg)"></span><div><b>bg</b><small>Фон страницы</small><code>#f4f7fc</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--surface)"></span><div><b>surface</b><small>Карточки, панели, поля</small><code>#ffffff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--surface-2)"></span><div><b>surface-2</b><small>Вторичный фон (чипы, переключатели)</small><code>#eef2fa</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--text)"></span><div><b>text</b><small>Основной текст</small><code>#121c36</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--muted)"></span><div><b>muted</b><small>Вторичный текст</small><code>#55627d</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--border)"></span><div><b>border</b><small>Границы</small><code>#d9e0ee</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--primary)"></span><div><b>primary</b><small>Акцент (кнопки, выбранное)</small><code>#2350d8</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--on-primary)"></span><div><b>on-primary</b><small>Текст на акценте</small><code>#ffffff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--primary-soft)"></span><div><b>primary-soft</b><small>Фон выбранного/подсветки</small><code>#e4ecff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--danger)"></span><div><b>danger</b><small>Ошибки, «просрочено»</small><code>#b3261e</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--danger-soft)"></span><div><b>danger-soft</b><small>Фон ошибок</small><code>#fdeceb</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--ok)"></span><div><b>ok</b><small>Успех</small><code>#17703f</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--class-bg)"></span><div><b>class-bg</b><small>Пара — фон</small><code>#e4ecff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--class-fg)"></span><div><b>class-fg</b><small>Пара — текст</small><code>#1a3a9c</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--class-bar)"></span><div><b>class-bar</b><small>Пара — левая полоса</small><code>#2f62ea</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--deadline-bg)"></span><div><b>deadline-bg</b><small>Дедлайн — фон</small><code>#fff0d9</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--deadline-fg)"></span><div><b>deadline-fg</b><small>Дедлайн — текст</small><code>#7a4708</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--deadline-bar)"></span><div><b>deadline-bar</b><small>Дедлайн — левая полоса</small><code>#c46f0a</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--note-bg)"></span><div><b>note-bg</b><small>Заметка — фон</small><code>#f0e9fd</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--note-fg)"></span><div><b>note-fg</b><small>Заметка — текст</small><code>#58389a</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--note-bar)"></span><div><b>note-bar</b><small>Заметка — левая полоса</small><code>#8a62d6</code></div></div></div>
+<h3>Тёмная тема</h3><div class="grid" id="dark"><div class="sw"><span class="chip" style="background:var(--bg)"></span><div><b>bg</b><small>Фон страницы</small><code>#0c1325</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--surface)"></span><div><b>surface</b><small>Карточки, панели, поля</small><code>#131c33</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--surface-2)"></span><div><b>surface-2</b><small>Вторичный фон (чипы, переключатели)</small><code>#1a2540</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--text)"></span><div><b>text</b><small>Основной текст</small><code>#e7ecf8</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--muted)"></span><div><b>muted</b><small>Вторичный текст</small><code>#9eabc6</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--border)"></span><div><b>border</b><small>Границы</small><code>#28375a</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--primary)"></span><div><b>primary</b><small>Акцент (кнопки, выбранное)</small><code>#86a8ff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--on-primary)"></span><div><b>on-primary</b><small>Текст на акценте</small><code>#0a1430</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--primary-soft)"></span><div><b>primary-soft</b><small>Фон выбранного/подсветки</small><code>#1c2c57</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--danger)"></span><div><b>danger</b><small>Ошибки, «просрочено»</small><code>#ff9b92</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--danger-soft)"></span><div><b>danger-soft</b><small>Фон ошибок</small><code>#3b1c1f</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--ok)"></span><div><b>ok</b><small>Успех</small><code>#6fd69a</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--class-bg)"></span><div><b>class-bg</b><small>Пара — фон</small><code>#1b2c5a</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--class-fg)"></span><div><b>class-fg</b><small>Пара — текст</small><code>#bdd0ff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--class-bar)"></span><div><b>class-bar</b><small>Пара — левая полоса</small><code>#6f97ff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--deadline-bg)"></span><div><b>deadline-bg</b><small>Дедлайн — фон</small><code>#3b2a0f</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--deadline-fg)"></span><div><b>deadline-fg</b><small>Дедлайн — текст</small><code>#ffd69c</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--deadline-bar)"></span><div><b>deadline-bar</b><small>Дедлайн — левая полоса</small><code>#f0a548</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--note-bg)"></span><div><b>note-bg</b><small>Заметка — фон</small><code>#2d2252</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--note-fg)"></span><div><b>note-fg</b><small>Заметка — текст</small><code>#dac8ff</code></div></div>
+<div class="sw"><span class="chip" style="background:var(--note-bar)"></span><div><b>note-bar</b><small>Заметка — левая полоса</small><code>#a98aee</code></div></div></div>
+<p style="color:var(--muted);font-size:14px">Все пары «текст — фон» проходят контраст WCAG AA (не ниже 4,5:1) в обеих темах. Если меняете цвета, проверьте контраст заново, например на webaim.org/resources/contrastchecker.</p>
+
+<h2>Шрифты</h2>
+<div class="two">
+<div class="card"><p class="eyebrow">Заголовки — serif</p>
+<div style="font-family:'Iowan Old Style','Palatino Linotype','Source Serif 4',Georgia,serif;letter-spacing:-.01em">
+<div style="font-size:36px;font-weight:600;line-height:1.1">Доброе утро, Алина</div><div style="font-size:24px;font-weight:600;margin-top:8px">5 – 11 октября</div><div style="font-size:20px;font-weight:600;margin-top:8px">Вторник, 6 октября</div></div>
+<p style="color:var(--muted);font-size:13px">В Figma: <b>Source Serif 4</b> (бесплатный, Google Fonts) или Georgia. Веса 600 и 700.</p></div>
+<div class="card"><p class="eyebrow">Интерфейс — sans</p>
+<div style="font-size:16px">Основной текст 16/24 — расписание, записи, поля.</div><div style="font-size:14px;color:var(--muted);margin-top:6px">Малый текст 14/20 — подписи, подсказки.</div><div style="font-size:12px;color:var(--muted);margin-top:6px">Мелкий 12/16 — счётчики, время в сетке.</div><p class="eyebrow" style="margin-top:10px">Подпись капсом</p>
+<p style="color:var(--muted);font-size:13px">В Figma: <b>Inter</b>. Веса 400, 500, 600.</p></div></div>
+
+<h2>Компоненты</h2>
+<h3>Кнопки</h3><div class="row"><span class="btn primary">Добавить дедлайн</span><span class="btn soft">Сегодня</span><span class="btn danger">Удалить</span></div>
+<h3>Переключатели и фильтры</h3><div class="row"><span class="pill"><i class="dot" style="background:var(--class-bar)"></i>Пары</span><span class="pill"><i class="dot" style="background:var(--deadline-bar)"></i>Дедлайны</span><span class="pill"><i class="dot" style="background:var(--note-bar)"></i>Заметки</span></div>
+<h3>События календаря (радиус 8px, полоса слева 3px)</h3><div class="row">
+<div class="ev class"><b>09:30–11:05</b><br>Алгебра, лекция<br><small>Университетский пр., 28</small></div>
+<div class="ev deadline"><b>23:59</b><br>Презентация по КСО</div>
+<div class="ev note"><b>весь день</b><br>Идея для курсовой</div></div>
+<h3>Приветствие и счётчики</h3><div class="row" style="align-items:stretch"><div class="hero" style="flex:1;min-width:260px"><small>Вторник, 6 октября</small><h2>Доброе утро</h2><small>Следующая пара: 09:30 — Математический анализ</small></div>
+<div class="stat"><b>4</b><span>пар сегодня</span></div><div class="stat"><b>0</b><span>дедлайнов</span></div><div class="stat"><b>0</b><span>личных дел</span></div></div>
+<h3>Поле ввода (высота 44px, радиус 12px)</h3><input class="f" placeholder="Название">
+
+<h2>Иконка приложения</h2>
+<div class="icons"><img src="icons/icon-192.png" width="96" alt=""><img src="icons/icon-512.png" width="96" alt=""><img src="icons/icon-maskable-512.png" width="96" alt="" style="border-radius:0"><span style="color:var(--muted);font-size:14px">Квадрат 512×512, скругление 112px, фон #2350d8, буква «Л» Georgia Bold. Третий вариант — «maskable» для Android (без скругления).</span></div>
+<p style="color:var(--muted);font-size:14px">Значки в интерфейсе — библиотека <b>Lucide</b> (lucide.dev, в Figma есть плагин Lucide Icons), линия 2px, размер 16–20px.</p>
+
+<h2>Размеры и сетка</h2>
+<table><tr><th>Что</th><th>Значение</th></tr>
+<tr><td>Скругления</td><td>поле и кнопка 12px · карточка, панель, окно 16px · чип-таблетка 9999px · событие 8px</td></tr>
+<tr><td>Отступы страницы</td><td>12px телефон · 20px планшет · 32px компьютер</td></tr>
+<tr><td>Макс. ширина</td><td>1400px; справа колонка 336px (план дня, дедлайны)</td></tr>
+<tr><td>Минимальная область нажатия</td><td>40–44px</td></tr>
+<tr><td>Неделя</td><td>час = 56px, колонка времени 52px, 7 колонок дней</td></tr>
+<tr><td>Телефон (&lt;768px)</td><td>вид «Список» вместо недельной сетки; кнопка «+» внизу справа 56px</td></tr></table>
+
+<h2>Экраны</h2><p style="color:var(--muted)">Скриншоты — в папке <code>screens/</code>.</p>
+</div></body></html>

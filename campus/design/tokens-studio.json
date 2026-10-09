@@ -1,0 +1,226 @@
+{
+  "$metadata": {
+    "tokenSetOrder": [
+      "light",
+      "dark"
+    ]
+  },
+  "light": {
+    "color": {
+      "bg": {
+        "value": "#f4f7fc",
+        "type": "color",
+        "description": "Фон страницы"
+      },
+      "surface": {
+        "value": "#ffffff",
+        "type": "color",
+        "description": "Карточки, панели, поля"
+      },
+      "surface-2": {
+        "value": "#eef2fa",
+        "type": "color",
+        "description": "Вторичный фон (чипы, переключатели)"
+      },
+      "text": {
+        "value": "#121c36",
+        "type": "color",
+        "description": "Основной текст"
+      },
+      "muted": {
+        "value": "#55627d",
+        "type": "color",
+        "description": "Вторичный текст"
+      },
+      "border": {
+        "value": "#d9e0ee",
+        "type": "color",
+        "description": "Границы"
+      },
+      "primary": {
+        "value": "#2350d8",
+        "type": "color",
+        "description": "Акцент (кнопки, выбранное)"
+      },
+      "on-primary": {
+        "value": "#ffffff",
+        "type": "color",
+        "description": "Текст на акценте"
+      },
+      "primary-soft": {
+        "value": "#e4ecff",
+        "type": "color",
+        "description": "Фон выбранного/подсветки"
+      },
+      "danger": {
+        "value": "#b3261e",
+        "type": "color",
+        "description": "Ошибки, «просрочено»"
+      },
+      "danger-soft": {
+        "value": "#fdeceb",
+        "type": "color",
+        "description": "Фон ошибок"
+      },
+      "ok": {
+        "value": "#17703f",
+        "type": "color",
+        "description": "Успех"
+      },
+      "class-bg": {
+        "value": "#e4ecff",
+        "type": "color",
+        "description": "Пара — фон"
+      },
+      "class-fg": {
+        "value": "#1a3a9c",
+        "type": "color",
+        "description": "Пара — текст"
+      },
+      "class-bar": {
+        "value": "#2f62ea",
+        "type": "color",
+        "description": "Пара — левая полоса"
+      },
+      "deadline-bg": {
+        "value": "#fff0d9",
+        "type": "color",
+        "description": "Дедлайн — фон"
+      },
+      "deadline-fg": {
+        "value": "#7a4708",
+        "type": "color",
+        "description": "Дедлайн — текст"
+      },
+      "deadline-bar": {
+        "value": "#c46f0a",
+        "type": "color",
+        "description": "Дедлайн — левая полоса"
+      },
+      "note-bg": {
+        "value": "#f0e9fd",
+        "type": "color",
+        "description": "Заметка — фон"
+      },
+      "note-fg": {
+        "value": "#58389a",
+        "type": "color",
+        "description": "Заметка — текст"
+      },
+      "note-bar": {
+        "value": "#8a62d6",
+        "type": "color",
+        "description": "Заметка — левая полоса"
+      }
+    }
+  },
+  "dark": {
+    "color": {
+      "bg": {
+        "value": "#0c1325",
+        "type": "color",
+        "description": "Фон страницы"
+      },
+      "surface": {
+        "value": "#131c33",
+        "type": "color",
+        "description": "Карточки, панели, поля"
+      },
+      "surface-2": {
+        "value": "#1a2540",
+        "type": "color",
+        "description": "Вторичный фон (чипы, переключатели)"
+      },
+      "text": {
+        "value": "#e7ecf8",
+        "type": "color",
+        "description": "Основной текст"
+      },
+      "muted": {
+        "value": "#9eabc6",
+        "type": "color",
+        "description": "Вторичный текст"
+      },
+      "border": {
+        "value": "#28375a",
+        "type": "color",
+        "description": "Границы"
+      },
+      "primary": {
+        "value": "#86a8ff",
+        "type": "color",
+        "description": "Акцент (кнопки, выбранное)"
+      },
+      "on-primary": {
+        "value": "#0a1430",
+        "type": "color",
+        "description": "Текст на акценте"
+      },
+      "primary-soft": {
+        "value": "#1c2c57",
+        "type": "color",
+        "description": "Фон выбранного/подсветки"
+      },
+      "danger": {
+        "value": "#ff9b92",
+        "type": "color",
+        "description": "Ошибки, «просрочено»"
+      },
+      "danger-soft": {
+        "value": "#3b1c1f",
+        "type": "color",
+        "description": "Фон ошибок"
+      },
+      "ok": {
+        "value": "#6fd69a",
+        "type": "color",
+        "description": "Успех"
+      },
+      "class-bg": {
+        "value": "#1b2c5a",
+        "type": "color",
+        "description": "Пара — фон"
+      },
+      "class-fg": {
+        "value": "#bdd0ff",
+        "type": "color",
+        "description": "Пара — текст"
+      },
+      "class-bar": {
+        "value": "#6f97ff",
+        "type": "color",
+        "description": "Пара — левая полоса"
+      },
+      "deadline-bg": {
+        "value": "#3b2a0f",
+        "type": "color",
+        "description": "Дедлайн — фон"
+      },
+      "deadline-fg": {
+        "value": "#ffd69c",
+        "type": "color",
+        "description": "Дедлайн — текст"
+      },
+      "deadline-bar": {
+        "value": "#f0a548",
+        "type": "color",
+        "description": "Дедлайн — левая полоса"
+      },
+      "note-bg": {
+        "value": "#2d2252",
+        "type": "color",
+        "description": "Заметка — фон"
+      },
+      "note-fg": {
+        "value": "#dac8ff",
+        "type": "color",
+        "description": "Заметка — текст"
+      },
+      "note-bar": {
+        "value": "#a98aee",
+        "type": "color",
+        "description": "Заметка — левая полоса"
+      }
+    }
+  }
+}
